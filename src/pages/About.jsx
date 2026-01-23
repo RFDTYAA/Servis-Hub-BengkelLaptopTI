@@ -1,4 +1,14 @@
 import React from "react";
+
+import fotorafi from "../assets/fotoprofile/rafi.png";
+import fotojauhan from "../assets/fotoprofile/jauhan.png";
+import fotoadjie from "../assets/fotoprofile/adjie.png";
+import fotodamtoy from "../assets/fotoprofile/damtoy.jpg";
+import fotoridho from "../assets/fotoprofile/ridho.png";
+import fotofarrel from "../assets/fotoprofile/farrel.jpg";
+import fotoraja from "../assets/fotoprofile/raja.jpg";
+import fotowildan from "../assets/fotoprofile/wildan.jpg";
+
 import {
   Award,
   Users,
@@ -9,48 +19,46 @@ import {
 } from "lucide-react";
 
 const About = () => {
-  // Data Anggota Tim (Sesuai Screenshot Anda)
-  // Nanti URL fotonya bisa Anda ganti dengan foto asli teman-teman Anda
   const teamMembers = [
     {
-      name: "M. Ridho Cahyono",
+      name: "Mohammad Ridho Cahyono",
       role: "Laptop & Handphone Specialist",
-      img: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+      img: fotoridho,
     },
     {
-      name: "M. Rafi Aditya",
+      name: "Muhammad Rafi Aditya",
       role: "PC Specialist & Web Designer",
-      img: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+      img: fotorafi,
     },
     {
       name: "Adam Toyib Nurwahid",
       role: "Printer Specialist",
-      img: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
+      img: fotodamtoy,
     },
     {
-      name: "M. Setya Adjie",
+      name: "Muhammad Setya Adjie",
       role: "Handphone Specialist",
-      img: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=400&q=80",
+      img: fotoadjie,
     },
     {
-      name: "Farrel Ghozy A.",
+      name: "Farrel Ghozy Afifuddin",
       role: "Laptop & Handphone Specialist",
-      img: "https://images.unsplash.com/photo-1463453091185-61582044d556?auto=format&fit=crop&w=400&q=80",
+      img: fotofarrel,
     },
     {
       name: "Muhammad Wildan",
       role: "Laptop & Handphone Specialist",
-      img: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80",
+      img: fotowildan,
     },
     {
       name: "Raja Muhammad",
       role: "Laptop & PC Specialist",
-      img: "https://images.unsplash.com/photo-1522529599102-193c0d76b5b6?auto=format&fit=crop&w=400&q=80",
+      img: fotoraja,
     },
     {
       name: "Jauhan Ahmad",
       role: "Web Designer",
-      img: "https://images.unsplash.com/photo-1531384441138-2736e62e0919?auto=format&fit=crop&w=400&q=80",
+      img: fotojauhan,
     },
   ];
 
@@ -70,7 +78,7 @@ const About = () => {
             <span className="text-brand-accent">Teknologi</span>
           </h1>
           <p className="text-gray-400 max-w-2xl mx-auto text-lg leading-relaxed">
-            Bengkel TI UNIDA Gontor dikelola langsung oleh mahasiswa terbaik
+            Bengkel TI UNIDA Gontor dikelola langsung oleh Mahasiswa Terbaik
             Program Studi Informatika. Kami memadukan teori akademis terkini
             dengan pengalaman praktik lapangan untuk memberikan solusi perbaikan
             terbaik.
@@ -78,7 +86,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* 2. VALUE PROPOSITION: Menggantikan teks kotak-kotak di screenshot lama */}
+      {/* 2. VALUE PROPOSITION */}
       <section className="pb-20">
         <div className="container mx-auto px-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -129,9 +137,12 @@ const About = () => {
               <GraduationCap size={40} className="text-brand-cyan" />
             </div>
             <div>
-              <h2 className="text-2xl font-bold">Powered by UNIDA Gontor</h2>
+              <h2 className="text-2xl font-bold">
+                Managed by GitaFreyaAnindya{" "}
+              </h2>
               <p className="text-gray-400">
-                Unit Usaha Mahasiswa Teknik Informatika
+                Unit Usaha Mahasiswa Teknik Informatika Universitas Darussalam
+                Gontor
               </p>
             </div>
           </div>
@@ -150,7 +161,7 @@ const About = () => {
         </div>
       </section>
 
-      {/* 4. TEAM SECTION: Pengganti papan kayu */}
+      {/* 4. TEAM SECTION */}
       <section className="py-24 relative">
         <div className="container mx-auto px-6">
           <div className="text-center mb-16">
@@ -197,9 +208,15 @@ const About = () => {
         <h2 className="text-2xl font-bold mb-6">
           Ingin bergabung dengan tim kami?
         </h2>
-        <button className="flex items-center gap-2 mx-auto text-brand-accent hover:text-white font-bold transition border-b border-brand-accent pb-1 hover:border-white">
+        {/* PERUBAHAN: Tombol menjadi Link ke WhatsApp, Desain TETAP SAMA */}
+        <a
+          href="https://wa.me/6282125548653"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 mx-auto text-brand-accent hover:text-white font-bold transition border-b border-brand-accent pb-1 hover:border-white"
+        >
           Hubungi Admin <ArrowUpRight size={18} />
-        </button>
+        </a>
       </section>
     </div>
   );

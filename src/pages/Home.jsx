@@ -31,18 +31,20 @@ const Home = () => {
               Jasa perbaikan komputer & laptop profesional dengan sistem
               tracking transparan. Performa kembali ngebut seperti baru.
             </p>
+
+            {/* PERUBAHAN: Tombol 'Buat Akun' dipindah ke sini (Atas) & Link ke Register */}
             <div className="flex gap-4 justify-center lg:justify-start">
               <Link
-                to="/pricing"
+                to="/register"
                 className="bg-brand-accent hover:bg-blue-600 text-white px-8 py-3 rounded-full font-bold transition flex items-center gap-2 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
               >
-                Cek Harga
+                Buat Akun
               </Link>
               <Link
-                to="/about"
+                to="/pricing"
                 className="border border-white/20 hover:border-white text-white px-8 py-3 rounded-full font-bold transition"
               >
-                Konsultasi
+                Cek Harga
               </Link>
             </div>
           </div>
@@ -72,28 +74,24 @@ const Home = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <ImageCard
-              // Gambar Motherboard
-              img="https://images.unsplash.com/photo-1555617981-d5a4f504646a?auto=format&fit=crop&w=500&q=80"
+              img="https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=500&q=80"
               icon={<Cpu size={24} />}
               title="Hardware Repair"
               desc="Ganti LCD, Keyboard, & Motherboard"
             />
             <ImageCard
-              // Gambar Coding/Software
               img="https://images.unsplash.com/photo-1542831371-29b0f74f9713?auto=format&fit=crop&w=500&q=80"
               icon={<DownloadCloud size={24} />}
               title="Software & OS"
               desc="Install Windows, Office, & Antivirus"
             />
             <ImageCard
-              // Gambar Cleaning Laptop
-              img="https://plus.unsplash.com/premium_photo-1678565999588-08fdd0b88c99?auto=format&fit=crop&w=500&q=80"
-              icon={<Wrench size={24} />}
+              img="https://images.unsplash.com/photo-1555099962-4199c345e5dd?auto=format&fit=crop&w=500&q=80"
+              icon={<DownloadCloud size={24} />}
               title="Maintenance"
               desc="Pembersihan Debu & Ganti Pasta"
             />
             <ImageCard
-              // Gambar SSD/RAM
               img="https://images.unsplash.com/photo-1591799264318-7e6ef8ddb7ea?auto=format&fit=crop&w=500&q=80"
               icon={<HardDrive size={24} />}
               title="Upgrade & Rakit"
@@ -103,12 +101,11 @@ const Home = () => {
         </div>
       </section>
 
-      {/* --- 3. SECTION ZIG-ZAG (RESIZED GAMBAR) --- */}
+      {/* --- 3. SECTION ZIG-ZAG --- */}
       <section className="py-16 bg-brand-dark">
         <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="relative flex justify-center">
             <div className="absolute -inset-2 border border-brand-accent/20 rounded-xl transform rotate-2"></div>
-            {/* PERBAIKAN: Max Height dibatasi h-64 (250px) sampai h-80 (320px) agar tidak kebesaran */}
             <img
               src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80"
               alt="Technician"
@@ -135,7 +132,7 @@ const Home = () => {
         </div>
       </section>
 
-      {/* --- 4. SECTION ZIG-ZAG (RESIZED GAMBAR) --- */}
+      {/* --- 4. SECTION ZIG-ZAG --- */}
       <section className="py-16 bg-brand-black overflow-hidden">
         <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="order-2 lg:order-1">
@@ -154,7 +151,6 @@ const Home = () => {
             </button>
           </div>
           <div className="relative order-1 lg:order-2 flex justify-center">
-            {/* PERBAIKAN: Max Height dibatasi */}
             <img
               src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80"
               alt="System Dashboard"
@@ -166,7 +162,6 @@ const Home = () => {
 
       {/* --- 5. CTA SECTION (MINIMALIS & KEREN) --- */}
       <section className="py-16 bg-brand-black flex justify-center px-6">
-        {/* Container dikecilkan (max-w-4xl) dan dibuat rounded (rounded-2xl) */}
         <div className="w-full max-w-4xl bg-gradient-to-r from-brand-dark to-[#0f2027] border border-white/10 rounded-2xl p-8 md:p-12 text-center relative overflow-hidden shadow-2xl">
           {/* Dekorasi Background */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/5 rounded-full blur-[80px]"></div>
@@ -180,15 +175,17 @@ const Home = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button className="bg-brand-accent hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm shadow-lg">
-                <MessageSquare size={18} /> Chat WhatsApp
-              </button>
-              <Link
-                to="/login"
-                className="bg-white/10 hover:bg-white/20 text-white border border-white/10 px-6 py-2.5 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm"
+              {/* PERUBAHAN: Tombol WhatsApp sekarang Fungsional (Link ke API WA) */}
+              <a
+                href="https://wa.me/6282125548653"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-brand-accent hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm shadow-lg"
               >
-                Buat Akun
-              </Link>
+                <MessageSquare size={18} /> Chat WhatsApp
+              </a>
+
+              {/* Tombol 'Buat Akun' di sini SUDAH DIHAPUS dan dipindah ke atas (Hero) */}
             </div>
           </div>
         </div>
@@ -197,7 +194,7 @@ const Home = () => {
   );
 };
 
-// Komponen Card Gambar (Tetap sama, tapi link gambar di atas sudah diperbarui)
+// Komponen Card Gambar
 const ImageCard = ({ img, title, desc, icon }) => (
   <div className="group relative overflow-hidden rounded-xl h-64 cursor-pointer border border-white/10">
     <img
