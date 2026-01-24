@@ -3,7 +3,7 @@ import React from "react";
 import fotorafi from "../assets/fotoprofile/rafi.png";
 import fotojauhan from "../assets/fotoprofile/jauhan.png";
 import fotoadjie from "../assets/fotoprofile/adjie.png";
-import fotodamtoy from "../assets/fotoprofile/damtoy.jpg";
+import fotodamtoy from "../assets/fotoprofile/damtoy.png";
 import fotoridho from "../assets/fotoprofile/ridho.png";
 import fotofarrel from "../assets/fotoprofile/farrel.jpg";
 import fotoraja from "../assets/fotoprofile/raja.jpg";

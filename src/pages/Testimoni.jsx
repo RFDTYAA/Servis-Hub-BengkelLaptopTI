@@ -1,255 +1,276 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
+import {
+  Star,
+  Quote,
+  MessageSquarePlus,
+  User,
+  Loader2,
+  X,
+  Send,
+} from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
-import { Star, User, Quote, Plus, X, Send } from "lucide-react";
 
 const Testimoni = () => {
-  const [reviews, setReviews] = useState([]);
+  const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showModal, setShowModal] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // State Form
+  // STATE BARU: Untuk Mengatur Modal & Form
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    role: "",
+    role: "", // Misal: Mahasiswa TI
     message: "",
-    rating: 5,
+    rating: 5, // Default bintang 5
   });
 
-  // 1. Fetch Data dari Supabase
-  const fetchReviews = async () => {
-    const { data, error } = await supabase
-      .from("testimonials")
-      .select("*")
-      .order("created_at", { ascending: false }); // Yang terbaru di atas
+  // 1. FUNGSI AMBIL DATA (READ)
+  const fetchTestimonials = async () => {
+    try {
+      setLoading(true);
+      // PERBAIKAN: Menggunakan nama tabel 'testimonials'
+      const { data, error } = await supabase
+        .from("testimonials")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-    if (error) console.error(error);
-    else setReviews(data);
-    setLoading(false);
+      if (error) throw error;
+      if (data) setTestimonials(data);
+    } catch (error) {
+      console.error("Gagal ambil data:", error.message);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
-    fetchReviews();
+    fetchTestimonials();
   }, []);
 
-  // 2. Handle Submit Review Baru
+  // 2. FUNGSI KIRIM DATA (CREATE)
   const handleSubmit = async (e) => {
-    e.preventDefault();
+    e.preventDefault(); // Mencegah reload halaman
     setIsSubmitting(true);
 
-    const { error } = await supabase.from("testimonials").insert([formData]);
+    try {
+      // Validasi sederhana
+      if (!formData.name || !formData.message) {
+        alert("Nama dan Pesan wajib diisi!");
+        setIsSubmitting(false);
+        return;
+      }
 
-    if (error) {
-      alert("Gagal kirim review: " + error.message);
-    } else {
-      alert("Terima kasih! Review Anda berhasil ditambahkan.");
-      setShowModal(false);
-      setFormData({ name: "", role: "", message: "", rating: 5 }); // Reset form
-      fetchReviews(); // Refresh data agar review baru muncul
+      // PERBAIKAN: Menggunakan nama tabel 'testimonials' (disamakan dengan saat fetch)
+      const { error } = await supabase.from("testimonials").insert([formData]);
+
+      if (error) throw error;
+
+      // Jika sukses:
+      alert("Terima kasih! Ulasan Anda berhasil dikirim.");
+      setIsModalOpen(false); // Tutup Modal
+      setFormData({ name: "", role: "", message: "", rating: 5 }); // Reset Form
+      fetchTestimonials(); // Refresh data agar ulasan baru langsung muncul
+    } catch (error) {
+      alert("Gagal mengirim ulasan: " + error.message);
+    } finally {
+      setIsSubmitting(false);
     }
-    setIsSubmitting(false);
   };
 
   return (
-    <div className="min-h-screen bg-brand-black text-white relative overflow-hidden">
-      {/* Background Decor */}
-      <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
-        <div className="absolute top-20 right-[-100px] w-96 h-96 bg-brand-accent/10 rounded-full blur-[100px]"></div>
-        <div className="absolute bottom-20 left-[-100px] w-96 h-96 bg-blue-500/10 rounded-full blur-[100px]"></div>
+    <div className="bg-brand-black text-white min-h-screen py-20 relative">
+      {/* HEADER */}
+      <div className="container mx-auto px-6 text-center mb-16">
+        <span className="text-brand-accent font-bold tracking-widest uppercase text-sm mb-2 block">
+          Kata Mereka
+        </span>
+        <h1 className="text-4xl md:text-5xl font-bold mb-6">
+          Tentang <span className="text-brand-cyan">Kami</span>
+        </h1>
+        <p className="text-gray-400 max-w-2xl mx-auto mb-8">
+          Kepuasan pelanggan adalah prioritas kami. Berikut adalah pengalaman
+          nyata mereka yang pernah servis di BengkelTl.
+        </p>
+
+        {/* TOMBOL BUKA MODAL */}
+        <button
+          onClick={() => setIsModalOpen(true)}
+          className="bg-white/5 hover:bg-brand-accent border border-white/10 text-white px-6 py-3 rounded-full font-bold transition flex items-center gap-2 mx-auto group shadow-lg hover:shadow-brand-accent/20"
+        >
+          <MessageSquarePlus
+            size={20}
+            className="text-brand-accent group-hover:text-white transition"
+          />
+          Tulis Pengalamanmu
+        </button>
       </div>
 
-      <div className="container mx-auto px-6 py-12 relative z-10">
-        {/* HEADER SECTION */}
-        <div className="text-center mb-16 max-w-2xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-white to-gray-400">
-            Kata Mereka Tentang <span className="text-brand-accent">Kami.</span>
-          </h1>
-          <p className="text-gray-400 text-lg mb-8">
-            Kepercayaan Anda adalah prioritas kami. Lihat apa yang dikatakan
-            pelanggan setia Bengkel TI.
-          </p>
-
-          {/* TOMBOL BUKA MODAL */}
-          <button
-            onClick={() => setShowModal(true)}
-            className="group bg-brand-accent hover:bg-orange-600 text-white px-8 py-3 rounded-full font-bold transition shadow-[0_0_20px_rgba(249,115,22,0.4)] hover:shadow-[0_0_30px_rgba(249,115,22,0.6)] flex items-center gap-2 mx-auto"
-          >
-            <Plus
-              size={20}
-              className="group-hover:rotate-90 transition duration-300"
-            />
-            Tulis Pengalamanmu
-          </button>
-        </div>
-
-        {/* LOADING STATE */}
+      {/* GRID TESTIMONI */}
+      <div className="container mx-auto px-6">
         {loading ? (
-          <div className="text-center py-20 text-gray-500 animate-pulse">
-            Sedang memuat testimoni...
+          <div className="flex flex-col items-center justify-center py-20">
+            <Loader2
+              size={48}
+              className="text-brand-accent animate-spin mb-4"
+            />
+            <p className="text-gray-400">Memuat ulasan...</p>
+          </div>
+        ) : testimonials.length === 0 ? (
+          <div className="text-center py-20 bg-brand-dark rounded-2xl border border-white/5 border-dashed">
+            <p className="text-gray-500 text-lg">
+              Belum ada testimoni. Jadilah yang pertama!
+            </p>
           </div>
         ) : (
-          /* GRID TESTIMONI */
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {reviews.length === 0 ? (
-              <div className="col-span-full text-center py-20 bg-white/5 rounded-2xl border border-white/10 border-dashed">
-                <p className="text-gray-400 text-xl">
-                  Belum ada testimoni. Jadilah yang pertama!
-                </p>
-              </div>
-            ) : (
-              reviews.map((item) => (
-                <div
-                  key={item.id}
-                  className="bg-white/5 backdrop-blur-md border border-white/10 p-6 rounded-2xl hover:border-brand-accent/50 transition group hover:-translate-y-1 duration-300"
-                >
-                  {/* Bintang & Quote */}
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="flex gap-1">
-                      {[...Array(5)].map((_, i) => (
-                        <Star
-                          key={i}
-                          size={16}
-                          className={
-                            i < item.rating
-                              ? "fill-brand-accent text-brand-accent"
-                              : "text-gray-600"
-                          }
-                        />
-                      ))}
-                    </div>
-                    <Quote
-                      size={24}
-                      className="text-white/10 group-hover:text-brand-accent/20 transition"
+            {testimonials.map((item) => (
+              <div
+                key={item.id}
+                className="bg-brand-dark p-8 rounded-2xl border border-white/5 relative flex flex-col h-full hover:border-brand-accent/30 transition duration-300 shadow-lg"
+              >
+                <Quote
+                  size={40}
+                  className="absolute top-6 right-6 text-white/5 rotate-180"
+                />
+
+                <div className="flex gap-1 mb-4 text-brand-accent">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      size={18}
+                      fill={i < item.rating ? "currentColor" : "none"}
+                      className={
+                        i < item.rating ? "text-brand-accent" : "text-gray-600"
+                      }
                     />
+                  ))}
+                </div>
+
+                <p className="text-gray-300 leading-relaxed mb-8 italic flex-grow">
+                  "{item.message}"
+                </p>
+
+                <div className="flex items-center gap-4 border-t border-white/5 pt-6 mt-auto">
+                  <div className="w-12 h-12 bg-gradient-to-br from-brand-accent to-brand-cyan rounded-full flex items-center justify-center text-white font-bold shadow-md shrink-0">
+                    <User size={20} />
                   </div>
-
-                  {/* Isi Pesan */}
-                  <p className="text-gray-300 mb-6 leading-relaxed italic">
-                    "{item.message}"
-                  </p>
-
-                  {/* Profil User */}
-                  <div className="flex items-center gap-3 border-t border-white/10 pt-4">
-                    <div className="bg-gradient-to-br from-brand-accent to-orange-700 w-10 h-10 rounded-full flex items-center justify-center text-white font-bold shadow-lg">
-                      {item.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-white text-sm">
-                        {item.name}
-                      </h4>
-                      <p className="text-xs text-gray-500">
-                        {item.role || "Pelanggan"}
-                      </p>
-                    </div>
+                  <div>
+                    <h4 className="font-bold text-white text-lg leading-tight">
+                      {item.name}
+                    </h4>
+                    <span className="text-sm text-brand-cyan font-medium">
+                      {item.role || "Pelanggan"}
+                    </span>
                   </div>
                 </div>
-              ))
-            )}
+              </div>
+            ))}
           </div>
         )}
       </div>
 
-      {/* --- MODAL FORM INPUT (POPUP) --- */}
-      {showModal && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-brand-dark border border-white/20 w-full max-w-lg rounded-2xl p-6 shadow-2xl relative">
+      {/* --- MODAL FORM (POP-UP) --- */}
+      {isModalOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-brand-dark border border-white/10 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative animate-in fade-in zoom-in duration-200">
+            {/* Tombol Close */}
             <button
-              onClick={() => setShowModal(false)}
-              className="absolute top-4 right-4 text-gray-400 hover:text-white"
+              onClick={() => setIsModalOpen(false)}
+              className="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 hover:bg-red-500/20 p-2 rounded-full transition"
             >
-              <X size={24} />
+              <X size={20} />
             </button>
 
-            <h2 className="text-2xl font-bold mb-1">Bagikan Ceritamu</h2>
-            <p className="text-gray-400 text-sm mb-6">
-              Masukan Anda membantu kami berkembang lebih baik.
-            </p>
+            <h2 className="text-2xl font-bold mb-6 text-white">
+              Bagikan Pengalamanmu
+            </h2>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 mb-1">
-                    NAMA LENGKAP
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="Nama Anda"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-brand-accent outline-none"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 mb-1">
-                    JURUSAN / STATUS
-                  </label>
-                  <input
-                    required
-                    type="text"
-                    placeholder="Contoh: TI / Dosen"
-                    value={formData.role}
-                    onChange={(e) =>
-                      setFormData({ ...formData, role: e.target.value })
-                    }
-                    className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-2 text-white focus:border-brand-accent outline-none"
-                  />
-                </div>
+              {/* Input Nama */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-1">
+                  Nama Lengkap
+                </label>
+                <input
+                  type="text"
+                  required
+                  className="w-full bg-brand-black border border-white/10 rounded-lg p-3 text-white focus:border-brand-accent focus:outline-none"
+                  placeholder="Contoh: Muhammad Rafi Aditya"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                />
               </div>
 
+              {/* Input Role/Status */}
               <div>
-                <label className="block text-xs font-bold text-gray-400 mb-1">
-                  BERI RATING
+                <label className="block text-sm text-gray-400 mb-1">
+                  Program Studi / Status
+                </label>
+                <input
+                  type="text"
+                  className="w-full bg-brand-black border border-white/10 rounded-lg p-3 text-white focus:border-brand-accent focus:outline-none"
+                  placeholder="Contoh: Teknik Informatika / Mahasiswa"
+                  value={formData.role}
+                  onChange={(e) =>
+                    setFormData({ ...formData, role: e.target.value })
+                  }
+                />
+              </div>
+
+              {/* Input Rating Bintang */}
+              <div>
+                <label className="block text-sm text-gray-400 mb-2">
+                  Rating Kepuasan
                 </label>
                 <div className="flex gap-2">
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
-                      key={star}
                       type="button"
+                      key={star}
                       onClick={() => setFormData({ ...formData, rating: star })}
-                      className="focus:outline-none transform hover:scale-110 transition"
+                      className={`transition transform hover:scale-110 ${star <= formData.rating ? "text-yellow-400" : "text-gray-600"}`}
                     >
                       <Star
-                        size={28}
-                        className={
-                          star <= formData.rating
-                            ? "fill-brand-accent text-brand-accent"
-                            : "text-gray-600"
-                        }
+                        size={32}
+                        fill={star <= formData.rating ? "currentColor" : "none"}
                       />
                     </button>
                   ))}
                 </div>
               </div>
 
+              {/* Input Pesan */}
               <div>
-                <label className="block text-xs font-bold text-gray-400 mb-1">
-                  PENGALAMAN ANDA
+                <label className="block text-sm text-gray-400 mb-1">
+                  Pesan Ulasan
                 </label>
                 <textarea
                   required
                   rows="4"
+                  className="w-full bg-brand-black border border-white/10 rounded-lg p-3 text-white focus:border-brand-accent focus:outline-none resize-none"
                   placeholder="Ceritakan pengalaman servis di sini..."
                   value={formData.message}
                   onChange={(e) =>
                     setFormData({ ...formData, message: e.target.value })
                   }
-                  className="w-full bg-black/40 border border-white/10 rounded-lg px-4 py-3 text-white focus:border-brand-accent outline-none"
                 ></textarea>
               </div>
 
+              {/* Tombol Submit */}
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-brand-accent hover:bg-orange-600 text-white font-bold py-3 rounded-lg flex justify-center items-center gap-2 transition"
+                className="w-full bg-brand-accent hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {isSubmitting ? (
-                  "Mengirim..."
+                  <>
+                    <Loader2 size={20} className="animate-spin" /> Mengirim...
+                  </>
                 ) : (
                   <>
-                    Kirim Testimoni <Send size={18} />
+                    <Send size={20} /> Kirim Ulasan
                   </>
                 )}
               </button>

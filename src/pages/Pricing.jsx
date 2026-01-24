@@ -8,12 +8,28 @@ import {
   Wrench,
   ShieldCheck,
   Zap,
+  MessageSquare, // Icon tambahan untuk WA
 } from "lucide-react";
 
 const Pricing = () => {
   const [searchTerm, setSearchTerm] = useState("");
 
-  // Data Harga diambil dari Screenshot yang Anda kirim
+  // Nomor Admin (Ganti dengan nomor Anda)
+  const phoneNumber = "6282125548653";
+
+  // Fungsi Helper untuk Link WA Per Item
+  const getWALink = (serviceName, price) => {
+    const message = `Halo Admin Bengkel TI, saya tertarik dengan layanan *${serviceName}* (${price}). Boleh tanya detail pengerjaan dan estimasi waktunya?`;
+    return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+  };
+
+  // Fungsi Helper untuk Link WA Umum
+  const getGeneralWALink = () => {
+    const message =
+      "Halo Admin Bengkel TI, saya mau konsultasi masalah kerusakan gadget saya yang belum ada di daftar harga.";
+    return `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+  };
+
   const services = [
     // --- HARDWARE & LAPTOP ---
     {
@@ -133,9 +149,8 @@ const Pricing = () => {
     },
   ];
 
-  // Logic untuk memfilter list berdasarkan ketikan user
   const filteredServices = services.filter((service) =>
-    service.name.toLowerCase().includes(searchTerm.toLowerCase())
+    service.name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -151,7 +166,6 @@ const Pricing = () => {
             kesayangan Anda di sini.
           </p>
 
-          {/* Search Box Keren */}
           <div className="relative max-w-lg mx-auto group">
             <div className="absolute inset-0 bg-brand-accent/20 blur-xl rounded-full opacity-0 group-hover:opacity-100 transition duration-500"></div>
             <div className="relative flex items-center bg-brand-black border border-white/10 rounded-full px-6 py-3 shadow-2xl focus-within:border-brand-accent transition">
@@ -170,24 +184,33 @@ const Pricing = () => {
       {/* 2. PRICING LIST GRID */}
       <section className="py-16">
         <div className="container mx-auto px-6">
-          {/* Jika tidak ada hasil pencarian */}
           {filteredServices.length === 0 && (
             <div className="text-center py-20">
               <p className="text-gray-500 text-lg">
                 Servis yang Anda cari tidak ditemukan.
               </p>
-              <button className="mt-4 text-brand-accent hover:underline">
+              {/* Tombol WA Aktif saat pencarian kosong */}
+              <a
+                href={getGeneralWALink()}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-4 text-brand-accent hover:underline font-bold cursor-pointer"
+              >
                 Hubungi Admin untuk tanya harga
-              </button>
+              </a>
             </div>
           )}
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredServices.map((service) => (
-              <div
+              // Ubah div pembungkus menjadi <a> agar bisa diklik ke WA
+              <a
+                href={getWALink(service.name, service.price)}
+                target="_blank"
+                rel="noopener noreferrer"
                 key={service.id}
                 className={`
-                  relative bg-brand-dark p-6 rounded-xl border transition-all duration-300 group hover:-translate-y-1
+                  relative bg-brand-dark p-6 rounded-xl border transition-all duration-300 group hover:-translate-y-1 cursor-pointer
                   ${
                     service.featured
                       ? "border-brand-accent/50 shadow-[0_0_15px_rgba(249,115,22,0.1)]"
@@ -195,7 +218,6 @@ const Pricing = () => {
                   }
                 `}
               >
-                {/* Badge "Popular" jika featured */}
                 {service.featured && (
                   <span className="absolute -top-3 right-4 bg-brand-accent text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg">
                     POPULAR
@@ -221,16 +243,23 @@ const Pricing = () => {
                   {service.name}
                 </h3>
 
-                <div className="flex items-baseline gap-1">
-                  <span className="text-2xl font-bold text-brand-cyan tracking-tight">
-                    {service.price}
-                  </span>
-                  <span className="text-xs text-gray-500">/ unit</span>
+                <div className="flex items-baseline justify-between mt-4">
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-2xl font-bold text-brand-cyan tracking-tight">
+                      {service.price}
+                    </span>
+                    <span className="text-xs text-gray-500">/ unit</span>
+                  </div>
+
+                  {/* Icon Panah kecil atau Chat menandakan bisa diklik */}
+                  <div className="opacity-0 group-hover:opacity-100 transition-opacity text-brand-accent">
+                    <MessageSquare size={18} />
+                  </div>
                 </div>
 
                 {/* Garis dekorasi bawah */}
                 <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-brand-accent to-brand-cyan w-0 group-hover:w-full transition-all duration-500 rounded-b-xl"></div>
-              </div>
+              </a>
             ))}
           </div>
         </div>
@@ -248,9 +277,15 @@ const Pricing = () => {
               pengecekan langsung.
             </p>
           </div>
-          <button className="bg-brand-accent hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-bold transition whitespace-nowrap shadow-lg">
-            Konsultasi via WA
-          </button>
+          {/* Tombol WA Aktif di Bawah */}
+          <a
+            href={getGeneralWALink()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="bg-brand-accent hover:bg-orange-600 text-white px-8 py-3 rounded-lg font-bold transition whitespace-nowrap shadow-lg flex items-center gap-2"
+          >
+            <MessageSquare size={18} /> Konsultasi via WA
+          </a>
         </div>
       </section>
     </div>
