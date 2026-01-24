@@ -1,9 +1,10 @@
-import React from "react";
+import React, { useEffect } from "react";
 import {
   BrowserRouter as Router,
   Routes,
   Route,
   Navigate,
+  useLocation, // 1. Import useLocation
 } from "react-router-dom";
 
 // --- IMPORT KOMPONEN UI (Layout) ---
@@ -22,21 +23,33 @@ import Register from "./pages/auth/Register";
 
 // --- IMPORT HALAMAN USER (PELANGGAN) ---
 import UserDashboard from "./pages/dashboard/User";
-import DaftarPerbaikan from "./pages/DaftarPerbaikan"; // Halaman Form Servis
-import Profile from "./pages/Profile"; // Halaman Kelola Akun
+import DaftarPerbaikan from "./pages/DaftarPerbaikan";
+import Profile from "./pages/Profile";
 
 // --- IMPORT HALAMAN ADMIN ---
-import AdminDashboard from "./pages/dashboard/Admin"; // Halaman Utama (Grafik)
-import AdminTransaksi from "./pages/dashboard/admin/Transaksi"; // Tabel Transaksi Aktif (Pending/Working)
-import AdminRiwayat from "./pages/dashboard/admin/Riwayat"; // Tabel Riwayat Selesai (Done/Cancelled)
+import AdminDashboard from "./pages/dashboard/Admin";
+import AdminTransaksi from "./pages/dashboard/admin/Transaksi";
+import AdminRiwayat from "./pages/dashboard/admin/Riwayat";
+
+// ==========================================
+// 0. KOMPONEN SCROLL TO TOP (BARU)
+// ==========================================
+const ScrollToTop = () => {
+  const { pathname } = useLocation();
+
+  useEffect(() => {
+    // Geser window ke posisi (0, 0) setiap kali pathname berubah
+    window.scrollTo(0, 0);
+  }, [pathname]);
+
+  return null;
+};
 
 // ==========================================
 // 1. KOMPONEN PROTEKSI (GUARD)
 // ==========================================
 const AdminRoute = ({ children }) => {
   const role = localStorage.getItem("userRole");
-
-  // Jika role bukan admin, tendang ke login
   if (role !== "admin") {
     return <Navigate to="/login" replace />;
   }
@@ -45,7 +58,6 @@ const AdminRoute = ({ children }) => {
 
 // ==========================================
 // 2. KOMPONEN LAYOUT UTAMA
-// (Membungkus halaman agar selalu ada Navbar & Footer)
 // ==========================================
 const Layout = ({ children }) => {
   return (
@@ -63,6 +75,9 @@ const Layout = ({ children }) => {
 function App() {
   return (
     <Router>
+      {/* Pasang ScrollToTop DI DALAM Router tapi DI LUAR Routes */}
+      <ScrollToTop />
+
       <Routes>
         {/* --- A. ROUTE PUBLIK --- */}
         <Route
@@ -143,8 +158,6 @@ function App() {
         />
 
         {/* --- D. ROUTE KHUSUS ADMIN (DIPROTEKSI) --- */}
-
-        {/* 1. Dashboard Utama (Grafik & Statistik) */}
         <Route
           path="/dashboard/admin"
           element={
@@ -155,8 +168,6 @@ function App() {
             </AdminRoute>
           }
         />
-
-        {/* 2. Halaman Transaksi Aktif (Pending & Proses) */}
         <Route
           path="/dashboard/admin/transaksi"
           element={
@@ -167,8 +178,6 @@ function App() {
             </AdminRoute>
           }
         />
-
-        {/* 3. Halaman Riwayat Selesai (Done & Cancelled) */}
         <Route
           path="/dashboard/admin/riwayat"
           element={
@@ -188,4 +197,3 @@ function App() {
 }
 
 export default App;
-  

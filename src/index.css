@@ -1,3 +1,17 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* TAMBAHAN BARU: Agar scroll halus di seluruh halaman */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbar (Opsional: Biar lebih keren sesuai tema gelap) */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0f172a;
+}
