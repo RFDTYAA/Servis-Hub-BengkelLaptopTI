@@ -19,6 +19,14 @@ import {
 } from "lucide-react";
 
 const About = () => {
+  // --- SETUP WHATSAPP LINK (BARU) ---
+  const phoneNumber = "6282125548653";
+  const message =
+    "Halo Admin, saya ingin konsultasi perihal cara bergabung menjadi staff Bengkel TI.";
+  const waLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+    message,
+  )}`;
+
   const teamMembers = [
     {
       name: "Mohammad Ridho Cahyono",
@@ -208,12 +216,12 @@ const About = () => {
         <h2 className="text-2xl font-bold mb-6">
           Ingin bergabung dengan tim kami?
         </h2>
-        {/* PERUBAHAN: Tombol menjadi Link ke WhatsApp, Desain TETAP SAMA */}
+        {/* PERUBAHAN: Link WhatsApp dengan pesan custom */}
         <a
-          href="https://wa.me/6282125548653"
+          href={waLink}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-2 mx-auto text-brand-accent hover:text-white font-bold transition border-b border-brand-accent pb-1 hover:border-white"
+          className="inline-flex items-center gap-2 mx-auto text-brand-accent hover:text-white font-bold transition border-b border-brand-accent pb-1 hover:border-white cursor-pointer"
         >
           Hubungi Admin <ArrowUpRight size={18} />
         </a>

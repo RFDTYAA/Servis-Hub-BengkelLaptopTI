@@ -39,7 +39,7 @@ const Navbar = () => {
         .single();
 
       if (profile) {
-        // UPDATE STATE & STORAGE (PENTING!)
+        // UPDATE STATE & STORAGE
         setUserRole(profile.role);
         setUserName(profile.full_name);
         setUserAvatar(profile.avatar_url);
@@ -65,7 +65,7 @@ const Navbar = () => {
     });
 
     return () => authListener.subscription.unsubscribe();
-  }, [location.pathname]); // Cek ulang setiap ganti halaman
+  }, [location.pathname]);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -83,7 +83,6 @@ const Navbar = () => {
   };
 
   return (
-    // FIX UKURAN: h-24 (Tinggi Navbar Dikunci)
     <nav className="bg-brand-black/95 backdrop-blur-md text-white h-24 flex items-center sticky top-0 z-50 border-b border-white/10 shadow-xl transition-all">
       <div className="container mx-auto px-6 flex justify-between items-center h-full">
         {/* LOGO */}
@@ -97,9 +96,9 @@ const Navbar = () => {
           BengkelLaptop<span className="text-brand-accent">TI.</span>
         </Link>
 
-        {/* --- MENU TENGAH (BERUBAH SESUAI ROLE) --- */}
-        <div className="hidden md:flex gap-8 text-base font-medium items-center h-full">
-          {/* A. JIKA BELUM LOGIN (TAMU) */}
+        {/* --- MENU TENGAH (SESUAI REQUEST) --- */}
+        <div className="hidden md:flex gap-6 lg:gap-8 text-sm lg:text-base font-medium items-center h-full">
+          {/* 1. GUEST (Tanpa Login) */}
           {!userRole && (
             <>
               <Link to="/" className={isActive("/")}>
@@ -117,7 +116,7 @@ const Navbar = () => {
             </>
           )}
 
-          {/* B. JIKA ADMIN */}
+          {/* 2. ADMIN */}
           {userRole === "admin" && (
             <>
               <Link
@@ -125,6 +124,9 @@ const Navbar = () => {
                 className={isActive("/dashboard/admin")}
               >
                 Dashboard (Admin)
+              </Link>
+              <Link to="/pricing" className={isActive("/pricing")}>
+                Katalog Harga
               </Link>
               <Link
                 to="/dashboard/admin/transaksi"
@@ -141,7 +143,7 @@ const Navbar = () => {
             </>
           )}
 
-          {/* C. JIKA PELANGGAN (YANG ANDA MINTA) */}
+          {/* 3. CUSTOMER (PELANGGAN) */}
           {userRole === "customer" && (
             <>
               <Link
@@ -150,20 +152,21 @@ const Navbar = () => {
               >
                 Dashboard (Pelanggan)
               </Link>
-
-              {/* PERBAIKAN DISINI: Ubah /pricing menjadi /daftar-perbaikan */}
               <Link
                 to="/daftar-perbaikan"
                 className={isActive("/daftar-perbaikan")}
               >
                 Daftar Perbaikan
               </Link>
-
-              <Link
-                to="/dashboard/user"
-                className={isActive("/dashboard/user")}
-              >
+              <Link to="/pricing" className={isActive("/pricing")}>
+                Katalog Harga
+              </Link>
+              <Link to="/dashboard/user" className={isActive("/cek-status")}>
                 Cek Status
+              </Link>{" "}
+              {/* Link ke Dashboard krn Status ada disana */}
+              <Link to="/testimoni" className={isActive("/testimoni")}>
+                Testimoni
               </Link>
             </>
           )}
@@ -212,18 +215,18 @@ const Navbar = () => {
 
               {/* ISI MENU DROPDOWN */}
               {isProfileOpen && (
-                <div className="absolute right-0 mt-4 w-96 bg-brand-dark border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
+                <div className="absolute right-0 mt-4 w-80 bg-brand-dark border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
                   <div className="p-5 border-b border-white/5 bg-black/30">
                     <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">
                       Signed in as
                     </p>
 
-                    <div className="flex flex-wrap items-baseline gap-2 mb-1">
-                      <span className="text-white font-bold text-lg">
+                    <div className="flex flex-col gap-1 mb-1">
+                      <span className="text-white font-bold text-lg truncate">
                         {userName}
                       </span>
-                      <span className="text-gray-400 text-sm font-normal">
-                        ({userEmail || "..."})
+                      <span className="text-gray-400 text-sm font-normal truncate">
+                        {userEmail}
                       </span>
                     </div>
 
@@ -267,16 +270,16 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* MOBILE MENU (Disesuaikan juga) */}
+      {/* --- MOBILE MENU (Dropdown HP) --- */}
       {isOpen && (
         <div className="md:hidden bg-brand-dark border-t border-white/10 p-6 absolute w-full left-0 top-full shadow-2xl z-40">
           <div className="flex flex-col gap-6 font-medium text-lg">
-            <Link to="/" onClick={() => setIsOpen(false)}>
-              Home
-            </Link>
-
+            {/* 1. GUEST MOBILE */}
             {!userRole && (
               <>
+                <Link to="/" onClick={() => setIsOpen(false)}>
+                  Home
+                </Link>
                 <Link to="/about" onClick={() => setIsOpen(false)}>
                   Tentang Kami
                 </Link>
@@ -296,10 +299,14 @@ const Navbar = () => {
               </>
             )}
 
+            {/* 2. ADMIN MOBILE */}
             {userRole === "admin" && (
               <>
                 <Link to="/dashboard/admin" onClick={() => setIsOpen(false)}>
                   Dashboard (Admin)
+                </Link>
+                <Link to="/pricing" onClick={() => setIsOpen(false)}>
+                  Katalog Harga
                 </Link>
                 <Link
                   to="/dashboard/admin/transaksi"
@@ -316,29 +323,52 @@ const Navbar = () => {
               </>
             )}
 
+            {/* 3. CUSTOMER MOBILE */}
             {userRole === "customer" && (
               <>
                 <Link to="/dashboard/user" onClick={() => setIsOpen(false)}>
                   Dashboard (Pelanggan)
                 </Link>
-                <Link to="/pricing" onClick={() => setIsOpen(false)}>
+                <Link to="/daftar-perbaikan" onClick={() => setIsOpen(false)}>
                   Daftar Perbaikan
+                </Link>
+                <Link to="/pricing" onClick={() => setIsOpen(false)}>
+                  Katalog Harga
                 </Link>
                 <Link to="/dashboard/user" onClick={() => setIsOpen(false)}>
                   Cek Status
                 </Link>
+                <Link to="/testimoni" onClick={() => setIsOpen(false)}>
+                  Testimoni
+                </Link>
               </>
             )}
 
+            {/* TOMBOL LOGOUT MOBILE */}
             {userRole && (
               <div className="border-t border-white/10 pt-4 mt-2">
                 <div className="mb-4">
-                  <p className="font-bold text-base">{userName}</p>
-                  <button
-                    onClick={handleLogout}
-                    className="text-red-400 font-bold block py-2 mt-2"
+                  <p className="font-bold text-base text-brand-accent mb-1">
+                    {userName}
+                  </p>
+                  <p className="text-xs text-gray-500 mb-4">{userEmail}</p>
+
+                  <Link
+                    to="/profile"
+                    onClick={() => setIsOpen(false)}
+                    className="flex items-center gap-2 text-gray-300 mb-3 text-sm"
                   >
-                    Logout
+                    <Settings size={16} /> Kelola Akun
+                  </Link>
+
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setIsOpen(false);
+                    }}
+                    className="text-red-400 font-bold block py-2 w-full text-left flex items-center gap-2"
+                  >
+                    <LogOut size={18} /> Logout
                   </button>
                 </div>
               </div>

@@ -11,6 +11,14 @@ import {
 import { Link } from "react-router-dom";
 
 const Home = () => {
+  // --- LOGIC WHATSAPP OTOMATIS (Ditambahkan) ---
+  const phoneNumber = "6282125548653";
+  const message =
+    "Halo Admin Bengkel TI, saya ingin konsultasi perihal kerusakan gadget saya. Bisakah dibantu?";
+  const waLink = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(
+    message,
+  )}`;
+
   return (
     <div className="bg-brand-black text-brand-text w-full overflow-hidden">
       {/* --- 1. HERO SECTION --- */}
@@ -28,11 +36,12 @@ const Home = () => {
               </span>
             </h1>
             <p className="text-gray-400 text-lg mb-8 max-w-md mx-auto lg:mx-0 leading-relaxed">
-              Jasa perbaikan komputer & laptop profesional dengan sistem
-              tracking transparan. Performa kembali ngebut seperti baru.
+              Jasa perbaikan Komputer, Laptop, Printer & Handphone secara
+              profesional dengan sistem tracking transparan. Performa kembali
+              ngebut seperti baru. Cepat, Transparan, dan bergaransi.
             </p>
 
-            {/* PERUBAHAN: Tombol 'Buat Akun' dipindah ke sini (Atas) & Link ke Register */}
+            {/* Tombol Hero */}
             <div className="flex gap-4 justify-center lg:justify-start">
               <Link
                 to="/register"
@@ -53,7 +62,6 @@ const Home = () => {
           <div className="relative order-1 lg:order-2 flex justify-center">
             <div className="absolute inset-0 bg-brand-accent/20 blur-[80px] rounded-full transform scale-75"></div>
             <img
-              // Link Gambar Baru (PC Gaming Setup)
               src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1000&auto=format&fit=crop"
               alt="Hero Image"
               className="relative z-10 h-auto max-h-[350px] lg:max-h-[400px] w-auto object-contain rounded-xl shadow-2xl border border-white/10 hover:scale-105 transition duration-500"
@@ -160,10 +168,9 @@ const Home = () => {
         </div>
       </section>
 
-      {/* --- 5. CTA SECTION (MINIMALIS & KEREN) --- */}
+      {/* --- 5. CTA SECTION --- */}
       <section className="py-16 bg-brand-black flex justify-center px-6">
         <div className="w-full max-w-4xl bg-gradient-to-r from-brand-dark to-[#0f2027] border border-white/10 rounded-2xl p-8 md:p-12 text-center relative overflow-hidden shadow-2xl">
-          {/* Dekorasi Background */}
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/5 rounded-full blur-[80px]"></div>
 
           <div className="relative z-10">
@@ -175,17 +182,15 @@ const Home = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              {/* PERUBAHAN: Tombol WhatsApp sekarang Fungsional (Link ke API WA) */}
+              {/* LINK WA DIUPDATE (Menggunakan waLink) */}
               <a
-                href="https://wa.me/6282125548653"
+                href={waLink}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-brand-accent hover:bg-orange-600 text-white px-6 py-2.5 rounded-lg font-bold transition flex items-center justify-center gap-2 text-sm shadow-lg"
               >
                 <MessageSquare size={18} /> Chat WhatsApp
               </a>
-
-              {/* Tombol 'Buat Akun' di sini SUDAH DIHAPUS dan dipindah ke atas (Hero) */}
             </div>
           </div>
         </div>
