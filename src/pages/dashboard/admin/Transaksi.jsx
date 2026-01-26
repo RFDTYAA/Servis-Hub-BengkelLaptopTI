@@ -1,47 +1,71 @@
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { supabase } from "../../../lib/supabaseClient";
 import {
   Search,
+  Edit,
+  Trash2,
   CheckCircle,
-  Clock,
-  Wrench,
   XCircle,
-  ChevronDown,
-  User,
-  Calendar,
-  UserCog, // Ikon baru untuk teknisi
+  Clock,
+  Save,
+  X,
+  UserCog,
+  Smartphone,
+  CreditCard,
+  UserCheck,
+  AlertTriangle,
+  Loader2,
 } from "lucide-react";
+import Swal from "sweetalert2";
 
-// DAFTAR TEKNISI
-const TECHNICIANS = [
-  "Mohammad Ridho Cahyono",
-  "Muhammad Rafi Aditya",
-  "Adam Toyib Nurwahid",
-  "Muhammad Setya Adjie",
-  "Farrel Ghozy Afifuddin",
-  "Muhammad Wildan",
-  "Raja Muhammad",
+// Import Foto Teknisi
+import fotoridho from "../../../assets/fotoprofile/ridho.png";
+import fotorafi from "../../../assets/fotoprofile/rafi.png";
+import fotodamtoy from "../../../assets/fotoprofile/damtoy.png";
+import fotoadjie from "../../../assets/fotoprofile/adjie.png";
+import fotofarrel from "../../../assets/fotoprofile/farrel.jpg";
+import fotowildan from "../../../assets/fotoprofile/wildan.jpg";
+import fotoraja from "../../../assets/fotoprofile/raja.jpg";
+import fotojauhan from "../../../assets/fotoprofile/jauhan.png";
+
+const TECHNICIANS_DATA = [
+  { name: "Mohammad Ridho Cahyono", img: fotoridho },
+  { name: "Muhammad Rafi Aditya", img: fotorafi },
+  { name: "Adam Toyib Nurwahid", img: fotodamtoy },
+  { name: "Muhammad Setya Adjie", img: fotoadjie },
+  { name: "Farrel Ghozy Afifuddin", img: fotofarrel },
+  { name: "Muhammad Wildan", img: fotowildan },
+  { name: "Raja Muhammad", img: fotoraja },
+  { name: "Jauhan Ahmad", img: fotojauhan },
 ];
 
-const AdminTransaksi = () => {
+const Transaksi = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [editData, setEditData] = useState({
+    id: null,
+    status: "",
+    cost: 0,
+    technician: "",
+    paymentType: "Cash",
+  });
 
-  // 1. FETCH HANYA TRANSAKSI AKTIF (Pending & Working)
+  // --- 1. FETCH HANYA YANG AKTIF (Pending, Approved, Working) ---
   const fetchTransactions = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from("transactions")
-        .select(`*, profiles:user_id ( full_name, email, avatar_url )`)
-        .in("status", ["Pending", "Working"])
+        .select(`*, profiles:user_id (full_name, email)`)
+        .in("status", ["Pending", "Approved", "Working"]) // FILTER UTAMA
         .order("created_at", { ascending: false });
 
       if (error) throw error;
       setTransactions(data);
     } catch (error) {
-      alert("Gagal mengambil data: " + error.message);
+      console.error("Error:", error.message);
     } finally {
       setLoading(false);
     }
@@ -51,309 +75,340 @@ const AdminTransaksi = () => {
     fetchTransactions();
   }, []);
 
-  // 2. UPDATE STATUS
-  const handleStatusChange = async (id, newStatus) => {
-    try {
-      if (newStatus === "Done" || newStatus === "Cancelled") {
-        setTransactions((prev) => prev.filter((item) => item.id !== id));
-      } else {
-        setTransactions((prev) =>
-          prev.map((item) =>
-            item.id === id ? { ...item, status: newStatus } : item,
-          ),
-        );
-      }
-
-      const { error } = await supabase
-        .from("transactions")
-        .update({ status: newStatus })
-        .eq("id", id);
-
-      if (error) throw error;
-    } catch (error) {
-      alert("Gagal update status!");
+  const handleDelete = async (id) => {
+    const result = await Swal.fire({
+      title: "Hapus Data?",
+      text: "Data akan hilang permanen!",
+      icon: "warning",
+      showCancelButton: true,
+      background: "#1e293b",
+      color: "#fff",
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#334155",
+      confirmButtonText: "Ya, Hapus!",
+    });
+    if (result.isConfirmed) {
+      await supabase.from("transactions").delete().eq("id", id);
       fetchTransactions();
     }
   };
 
-  // 3. UPDATE BIAYA
-  const handleCostChange = async (id, newCost) => {
+  const handleEditClick = (item) => {
+    setEditData({
+      id: item.id,
+      status: item.status,
+      cost: item.total_cost || 0,
+      technician: item.technician_name || "",
+      paymentType: item.payment_type || "Cash",
+    });
+    setIsEditOpen(true);
+  };
+
+  const handleSaveEdit = async (e) => {
+    e.preventDefault();
     try {
       const { error } = await supabase
         .from("transactions")
-        .update({ total_cost: newCost })
-        .eq("id", id);
-      if (error) throw error;
-    } catch (error) {
-      alert("Gagal update biaya: " + error.message);
-    }
-  };
-
-  const onCostInputChange = (id, value) => {
-    setTransactions((prev) =>
-      prev.map((item) =>
-        item.id === id ? { ...item, total_cost: value } : item,
-      ),
-    );
-  };
-
-  // 4. UPDATE TEKNISI (FITUR BARU)
-  const handleTechnicianChange = async (id, newTech) => {
-    try {
-      // Optimistic Update
-      setTransactions((prev) =>
-        prev.map((item) =>
-          item.id === id ? { ...item, technician_name: newTech } : item,
-        ),
-      );
-
-      const { error } = await supabase
-        .from("transactions")
-        .update({ technician_name: newTech })
-        .eq("id", id);
+        .update({
+          status: editData.status,
+          total_cost: editData.cost,
+          technician_name: editData.technician,
+          payment_type: editData.paymentType,
+        })
+        .eq("id", editData.id);
 
       if (error) throw error;
+
+      Swal.fire({
+        title: "Berhasil!",
+        icon: "success",
+        background: "#1e293b",
+        color: "#fff",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+      setIsEditOpen(false);
+      fetchTransactions(); // Refresh data (data selesai akan hilang dr list ini)
     } catch (error) {
-      alert("Gagal update teknisi: " + error.message);
+      Swal.fire("Gagal", error.message, "error");
     }
   };
 
-  const parseData = (desc) => {
-    const categoryMatch = desc.match(/^\[(.*?)\]/);
-    const category = categoryMatch ? categoryMatch[1] : "Umum";
-    const cleanDesc = desc.replace(/^\[.*?\]/, "").trim();
-    return { category, cleanDesc };
-  };
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "Pending":
-        return "bg-yellow-500/10 text-yellow-500 border-yellow-500/20";
-      case "Working":
-        return "bg-blue-500/10 text-blue-500 border-blue-500/20";
-      default:
-        return "bg-gray-500/10 text-gray-500";
-    }
+  const getTechPhoto = (name) => {
+    const tech = TECHNICIANS_DATA.find((t) => t.name === name);
+    return tech ? tech.img : null;
   };
 
   const filteredData = transactions.filter(
     (item) =>
       item.profiles?.full_name
-        .toLowerCase()
+        ?.toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      item.device_name.toLowerCase().includes(searchTerm.toLowerCase()),
+      item.device_name?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
-    <div className="min-h-screen bg-brand-black text-white p-6 pb-20">
-      <div className="container mx-auto">
-        <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-brand-accent">
-              Transaksi Aktif
-            </h1>
-            <p className="text-gray-400 mt-1">
-              Daftar antrian & proses pengerjaan saat ini.
-            </p>
-          </div>
-
-          <div className="relative w-full md:w-auto">
-            <Search
-              className="absolute left-4 top-3.5 text-gray-500"
-              size={20}
-            />
-            <input
-              type="text"
-              placeholder="Cari pesanan..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full md:w-80 bg-white/5 border border-white/10 rounded-full py-3 pl-12 pr-6 text-white focus:outline-none focus:border-brand-accent transition"
-            />
-          </div>
+    <div className="p-6 min-h-screen bg-brand-black text-white">
+      <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+        <div>
+          <h1 className="text-3xl font-bold mb-1 flex items-center gap-2 text-brand-accent">
+            <Smartphone /> Transaksi Aktif
+          </h1>
+          <p className="text-gray-400">Kelola antrian yang sedang berjalan.</p>
         </div>
-
-        <div className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-white/5 text-gray-400 text-sm uppercase tracking-wider border-b border-white/10">
-                  <th className="p-6 font-bold">ID</th>
-                  <th className="p-6 font-bold">Pelanggan</th>
-                  <th className="p-6 font-bold">Perangkat</th>
-                  <th className="p-6 font-bold w-48">Teknisi</th>{" "}
-                  {/* KOLOM TEKNISI */}
-                  <th className="p-6 font-bold w-40">Estimasi Biaya</th>
-                  <th className="p-6 font-bold">Status</th>
-                  <th className="p-6 font-bold text-center">Action</th>
-                </tr>
-              </thead>
-
-              <tbody className="divide-y divide-white/5">
-                {loading ? (
-                  <tr>
-                    <td
-                      colSpan="7"
-                      className="p-10 text-center text-gray-500 animate-pulse"
-                    >
-                      Memuat data...
-                    </td>
-                  </tr>
-                ) : filteredData.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="p-10 text-center text-gray-500">
-                      Tidak ada transaksi aktif.
-                    </td>
-                  </tr>
-                ) : (
-                  filteredData.map((item) => {
-                    const { category, cleanDesc } = parseData(
-                      item.problem_desc,
-                    );
-                    return (
-                      <tr key={item.id} className="hover:bg-white/5 transition">
-                        <td className="p-6 font-mono text-brand-accent">
-                          #{item.id}
-                        </td>
-                        <td className="p-6">
-                          <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-gray-400 overflow-hidden">
-                              {item.profiles?.avatar_url ? (
-                                <img
-                                  src={item.profiles.avatar_url}
-                                  className="w-full h-full object-cover"
-                                />
-                              ) : (
-                                <User size={18} />
-                              )}
-                            </div>
-                            <div>
-                              <div className="font-bold text-white text-sm">
-                                {item.profiles?.full_name}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {new Date(item.created_at).toLocaleDateString(
-                                  "id-ID",
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="p-6">
-                          <div className="font-bold text-white text-sm">
-                            {item.device_name}
-                          </div>
-                          <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-white/10 text-gray-400 border border-white/5">
-                            {category}
-                          </span>
-                          <p
-                            className="text-sm text-gray-400 truncate max-w-[150px]"
-                            title={cleanDesc}
-                          >
-                            {cleanDesc}
-                          </p>
-                        </td>
-
-                        {/* KOLOM PILIH TEKNISI */}
-                        <td className="p-6">
-                          <div className="relative group/input">
-                            <UserCog
-                              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
-                              size={16}
-                            />
-                            <select
-                              value={item.technician_name || ""}
-                              onChange={(e) =>
-                                handleTechnicianChange(item.id, e.target.value)
-                              }
-                              className="w-full bg-black/20 border border-white/10 rounded-lg py-2 pl-9 pr-8 text-white text-sm focus:border-brand-accent focus:outline-none appearance-none cursor-pointer hover:bg-black/30 transition"
-                            >
-                              <option value="">-- Pilih --</option>
-                              {TECHNICIANS.map((tech) => (
-                                <option key={tech} value={tech}>
-                                  {tech}
-                                </option>
-                              ))}
-                            </select>
-                            <ChevronDown
-                              size={14}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
-                            />
-                          </div>
-                        </td>
-
-                        <td className="p-6">
-                          <div className="relative group/input">
-                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
-                              Rp
-                            </span>
-                            <input
-                              type="number"
-                              value={item.total_cost || ""}
-                              onChange={(e) =>
-                                onCostInputChange(item.id, e.target.value)
-                              }
-                              onBlur={(e) =>
-                                handleCostChange(item.id, e.target.value)
-                              }
-                              placeholder="0"
-                              className="w-full bg-black/20 border border-white/10 rounded-lg py-2 pl-9 pr-2 text-white text-sm focus:border-brand-accent focus:outline-none transition"
-                            />
-                          </div>
-                        </td>
-
-                        <td className="p-6">
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${getStatusColor(
-                              item.status,
-                            )}`}
-                          >
-                            {item.status}
-                          </span>
-                        </td>
-
-                        <td className="p-6 text-center">
-                          <div className="relative inline-block">
-                            <select
-                              value={item.status}
-                              onChange={(e) =>
-                                handleStatusChange(item.id, e.target.value)
-                              }
-                              className="appearance-none bg-brand-dark border border-white/20 text-white text-sm pl-4 pr-8 py-2 rounded-lg cursor-pointer focus:border-brand-accent focus:outline-none hover:bg-white/10 transition"
-                            >
-                              <option value="Pending">Antrian</option>
-                              <option value="Working">Proses</option>
-                              <option
-                                disabled
-                                className="bg-gray-800 text-gray-500"
-                              >
-                                --- Pindahkan ---
-                              </option>
-                              <option value="Done" className="text-green-400">
-                                ✅ Selesai
-                              </option>
-                              <option
-                                value="Cancelled"
-                                className="text-red-400"
-                              >
-                                ❌ Batalkan
-                              </option>
-                            </select>
-                            <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
-                              <ChevronDown size={14} />
-                            </div>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-3 top-3 text-gray-400" size={18} />
+          <input
+            type="text"
+            placeholder="Cari Pelanggan..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="w-full bg-brand-dark border border-white/10 rounded-full py-2.5 pl-10 pr-4 text-sm focus:outline-none focus:border-brand-accent transition shadow-lg"
+          />
         </div>
       </div>
+
+      <div className="bg-brand-dark border border-white/10 rounded-xl overflow-hidden shadow-2xl">
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-white/5 text-gray-400 text-xs font-bold uppercase tracking-wider border-b border-white/10">
+                <th className="p-4">ID & Tgl</th>
+                <th className="p-4">Pelanggan</th>
+                <th className="p-4">Perangkat</th>
+                <th className="p-4">Teknisi</th>
+                <th className="p-4">Biaya</th>
+                <th className="p-4">Status</th>
+                <th className="p-4 text-center">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-white/5">
+              {loading ? (
+                <tr>
+                  <td colSpan="7" className="p-8 text-center animate-pulse">
+                    <Loader2 className="animate-spin inline mr-2" /> Memuat...
+                  </td>
+                </tr>
+              ) : filteredData.length === 0 ? (
+                <tr>
+                  <td colSpan="7" className="p-8 text-center text-gray-500">
+                    Tidak ada transaksi aktif.
+                  </td>
+                </tr>
+              ) : (
+                filteredData.map((item) => (
+                  // HOVER EFFECT: Minimalis (bg-white/5)
+                  <tr
+                    key={item.id}
+                    className="hover:bg-white/5 transition-colors duration-200 group"
+                  >
+                    <td className="p-4 align-top">
+                      <span className="font-mono text-brand-accent font-bold">
+                        #{item.id.slice(0, 6)}
+                      </span>
+                      <div className="text-xs text-gray-500 mt-1">
+                        {new Date(item.created_at).toLocaleDateString("id-ID")}
+                      </div>
+                    </td>
+                    <td className="p-4 align-top">
+                      <div className="font-bold text-white text-sm">
+                        {item.profiles?.full_name}
+                      </div>
+                      <div className="text-[10px] text-gray-500">
+                        {item.profiles?.email}
+                      </div>
+                    </td>
+                    <td className="p-4 align-top max-w-[180px]">
+                      <div className="font-medium text-white text-sm">
+                        {item.device_name}
+                      </div>
+                      <div className="text-[10px] text-gray-400 mt-1 truncate">
+                        {item.problem_desc?.replace(/^\[.*?\]/, "")}
+                      </div>
+                    </td>
+                    <td className="p-4 align-top">
+                      {item.technician_name ? (
+                        <div className="flex items-center gap-2">
+                          <img
+                            src={getTechPhoto(item.technician_name)}
+                            className="w-6 h-6 rounded-full border border-brand-accent object-cover"
+                          />
+                          <span className="text-xs font-bold text-brand-cyan">
+                            {item.technician_name.split(" ")[0]}
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-xs text-red-400 italic">
+                          Belum diset
+                        </span>
+                      )}
+                    </td>
+                    <td className="p-4 align-top font-mono text-sm">
+                      {item.total_cost > 0 ? (
+                        <span className="text-green-400">
+                          Rp {item.total_cost.toLocaleString("id-ID")}
+                        </span>
+                      ) : (
+                        <span className="text-gray-500">Menunggu</span>
+                      )}
+                      <div className="text-[10px] text-gray-500 mt-0.5 uppercase border border-white/10 px-1 rounded w-fit">
+                        {item.payment_type || "Cash"}
+                      </div>
+                    </td>
+                    <td className="p-4 align-top">
+                      <span
+                        className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border flex items-center w-fit gap-1 ${
+                          item.status === "Working"
+                            ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
+                            : item.status === "Approved"
+                              ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
+                              : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                        }`}
+                      >
+                        {item.status === "Pending" && <Clock size={10} />}
+                        {item.status === "Approved" && <UserCheck size={10} />}
+                        {item.status === "Working" && (
+                          <Clock size={10} className="animate-spin" />
+                        )}
+                        {item.status}
+                      </span>
+                    </td>
+                    <td className="p-4 align-top text-center">
+                      <div className="flex justify-center gap-2 opacity-80 group-hover:opacity-100 transition">
+                        <button
+                          onClick={() => handleEditClick(item)}
+                          className="p-1.5 bg-brand-accent/10 text-brand-accent rounded hover:bg-brand-accent hover:text-white transition"
+                        >
+                          <Edit size={14} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(item.id)}
+                          className="p-1.5 bg-red-500/10 text-red-400 rounded hover:bg-red-500 hover:text-white transition"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      {/* MODAL EDIT (SAMA SEPERTI SEBELUMNYA) */}
+      {isEditOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-brand-dark border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl animate-in zoom-in duration-200">
+            <div className="bg-white/5 p-5 border-b border-white/10 flex justify-between items-center">
+              <h2 className="text-lg font-bold text-white flex gap-2 items-center">
+                <Edit size={18} /> Update Pesanan
+              </h2>
+              <button onClick={() => setIsEditOpen(false)}>
+                <X size={20} className="text-gray-400 hover:text-white" />
+              </button>
+            </div>
+            <form onSubmit={handleSaveEdit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
+                  Teknisi
+                </label>
+                <div className="relative">
+                  <UserCog
+                    className="absolute left-3 top-3 text-brand-accent"
+                    size={16}
+                  />
+                  <select
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 pl-9 text-sm text-white focus:border-brand-accent focus:outline-none"
+                    value={editData.technician}
+                    onChange={(e) =>
+                      setEditData({ ...editData, technician: e.target.value })
+                    }
+                  >
+                    <option value="">-- Pilih Teknisi --</option>
+                    {TECHNICIANS_DATA.map((tech, i) => (
+                      <option key={i} value={tech.name}>
+                        {tech.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
+                    Biaya (Rp)
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-brand-accent focus:outline-none"
+                    value={editData.cost}
+                    onChange={(e) =>
+                      setEditData({ ...editData, cost: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
+                    Pembayaran
+                  </label>
+                  <select
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-brand-accent focus:outline-none"
+                    value={editData.paymentType}
+                    onChange={(e) =>
+                      setEditData({ ...editData, paymentType: e.target.value })
+                    }
+                  >
+                    <option value="Cash">Cash</option>
+                    <option value="Transfer">Transfer</option>
+                    <option value="QRIS">QRIS</option>
+                    <option value="Pending">Belum Bayar</option>
+                  </select>
+                </div>
+              </div>
+              <div className="bg-brand-accent/5 p-3 rounded-lg border border-brand-accent/20">
+                <label className="block text-xs font-bold text-brand-accent uppercase mb-1">
+                  Status
+                </label>
+                <select
+                  className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-brand-accent focus:outline-none"
+                  value={editData.status}
+                  onChange={(e) =>
+                    setEditData({ ...editData, status: e.target.value })
+                  }
+                >
+                  <option value="Pending">Pending</option>
+                  <option value="Approved">Approved (Disetujui)</option>
+                  <option value="Working">Working (Proses)</option>
+                  <option value="Selesai">Selesai (Pindah ke Riwayat)</option>
+                  <option value="Dibatalkan">
+                    Dibatalkan (Pindah ke Riwayat)
+                  </option>
+                </select>
+                <div className="flex gap-2 mt-2 text-[10px] text-gray-400">
+                  <AlertTriangle
+                    size={12}
+                    className="text-yellow-500 shrink-0"
+                  />
+                  <span>
+                    Tunggu status <b>Approved</b> sebelum ubah ke <b>Working</b>
+                    .
+                  </span>
+                </div>
+              </div>
+              <button
+                type="submit"
+                className="w-full bg-brand-accent hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition"
+              >
+                Simpan Perubahan
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-export default AdminTransaksi;
+export default Transaksi;
