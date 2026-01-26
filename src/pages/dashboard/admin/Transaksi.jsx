@@ -9,7 +9,19 @@ import {
   ChevronDown,
   User,
   Calendar,
+  UserCog, // Ikon baru untuk teknisi
 } from "lucide-react";
+
+// DAFTAR TEKNISI
+const TECHNICIANS = [
+  "Mohammad Ridho Cahyono",
+  "Muhammad Rafi Aditya",
+  "Adam Toyib Nurwahid",
+  "Muhammad Setya Adjie",
+  "Farrel Ghozy Afifuddin",
+  "Muhammad Wildan",
+  "Raja Muhammad",
+];
 
 const AdminTransaksi = () => {
   const [transactions, setTransactions] = useState([]);
@@ -23,7 +35,7 @@ const AdminTransaksi = () => {
       const { data, error } = await supabase
         .from("transactions")
         .select(`*, profiles:user_id ( full_name, email, avatar_url )`)
-        .in("status", ["Pending", "Working"]) // <--- FILTER KUNCI
+        .in("status", ["Pending", "Working"])
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -39,17 +51,16 @@ const AdminTransaksi = () => {
     fetchTransactions();
   }, []);
 
-  // 2. UPDATE STATUS (Jika diubah ke Done/Cancelled, otomatis hilang dari list)
+  // 2. UPDATE STATUS
   const handleStatusChange = async (id, newStatus) => {
     try {
-      // Optimistic Update: Langsung buang dari list jika statusnya 'Done' atau 'Cancelled'
       if (newStatus === "Done" || newStatus === "Cancelled") {
         setTransactions((prev) => prev.filter((item) => item.id !== id));
       } else {
         setTransactions((prev) =>
           prev.map((item) =>
-            item.id === id ? { ...item, status: newStatus } : item
-          )
+            item.id === id ? { ...item, status: newStatus } : item,
+          ),
         );
       }
 
@@ -61,7 +72,7 @@ const AdminTransaksi = () => {
       if (error) throw error;
     } catch (error) {
       alert("Gagal update status!");
-      fetchTransactions(); // Balikin data jika gagal
+      fetchTransactions();
     }
   };
 
@@ -81,9 +92,30 @@ const AdminTransaksi = () => {
   const onCostInputChange = (id, value) => {
     setTransactions((prev) =>
       prev.map((item) =>
-        item.id === id ? { ...item, total_cost: value } : item
-      )
+        item.id === id ? { ...item, total_cost: value } : item,
+      ),
     );
+  };
+
+  // 4. UPDATE TEKNISI (FITUR BARU)
+  const handleTechnicianChange = async (id, newTech) => {
+    try {
+      // Optimistic Update
+      setTransactions((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, technician_name: newTech } : item,
+        ),
+      );
+
+      const { error } = await supabase
+        .from("transactions")
+        .update({ technician_name: newTech })
+        .eq("id", id);
+
+      if (error) throw error;
+    } catch (error) {
+      alert("Gagal update teknisi: " + error.message);
+    }
   };
 
   const parseData = (desc) => {
@@ -109,7 +141,7 @@ const AdminTransaksi = () => {
       item.profiles?.full_name
         .toLowerCase()
         .includes(searchTerm.toLowerCase()) ||
-      item.device_name.toLowerCase().includes(searchTerm.toLowerCase())
+      item.device_name.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   return (
@@ -148,7 +180,8 @@ const AdminTransaksi = () => {
                   <th className="p-6 font-bold">ID</th>
                   <th className="p-6 font-bold">Pelanggan</th>
                   <th className="p-6 font-bold">Perangkat</th>
-                  <th className="p-6 font-bold">Masalah</th>
+                  <th className="p-6 font-bold w-48">Teknisi</th>{" "}
+                  {/* KOLOM TEKNISI */}
                   <th className="p-6 font-bold w-40">Estimasi Biaya</th>
                   <th className="p-6 font-bold">Status</th>
                   <th className="p-6 font-bold text-center">Action</th>
@@ -174,7 +207,7 @@ const AdminTransaksi = () => {
                 ) : (
                   filteredData.map((item) => {
                     const { category, cleanDesc } = parseData(
-                      item.problem_desc
+                      item.problem_desc,
                     );
                     return (
                       <tr key={item.id} className="hover:bg-white/5 transition">
@@ -199,7 +232,7 @@ const AdminTransaksi = () => {
                               </div>
                               <div className="text-xs text-gray-500">
                                 {new Date(item.created_at).toLocaleDateString(
-                                  "id-ID"
+                                  "id-ID",
                                 )}
                               </div>
                             </div>
@@ -212,14 +245,40 @@ const AdminTransaksi = () => {
                           <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-white/10 text-gray-400 border border-white/5">
                             {category}
                           </span>
-                        </td>
-                        <td className="p-6 max-w-xs">
                           <p
-                            className="text-sm text-gray-400 truncate"
+                            className="text-sm text-gray-400 truncate max-w-[150px]"
                             title={cleanDesc}
                           >
                             {cleanDesc}
                           </p>
+                        </td>
+
+                        {/* KOLOM PILIH TEKNISI */}
+                        <td className="p-6">
+                          <div className="relative group/input">
+                            <UserCog
+                              className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
+                              size={16}
+                            />
+                            <select
+                              value={item.technician_name || ""}
+                              onChange={(e) =>
+                                handleTechnicianChange(item.id, e.target.value)
+                              }
+                              className="w-full bg-black/20 border border-white/10 rounded-lg py-2 pl-9 pr-8 text-white text-sm focus:border-brand-accent focus:outline-none appearance-none cursor-pointer hover:bg-black/30 transition"
+                            >
+                              <option value="">-- Pilih --</option>
+                              {TECHNICIANS.map((tech) => (
+                                <option key={tech} value={tech}>
+                                  {tech}
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown
+                              size={14}
+                              className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500"
+                            />
+                          </div>
                         </td>
 
                         <td className="p-6">
@@ -245,7 +304,7 @@ const AdminTransaksi = () => {
                         <td className="p-6">
                           <span
                             className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${getStatusColor(
-                              item.status
+                              item.status,
                             )}`}
                           >
                             {item.status}

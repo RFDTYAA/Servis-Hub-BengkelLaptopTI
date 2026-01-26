@@ -12,6 +12,7 @@ import {
   FileDown,
   XCircle,
   Check,
+  User, // Import icon User untuk Teknisi
 } from "lucide-react";
 import { NotaInvoice } from "../../components/NotaInvoice";
 
@@ -79,8 +80,8 @@ const UserDashboard = () => {
         // Optimistic Update (Biar UI berubah instan)
         setServices((prev) =>
           prev.map((item) =>
-            item.id === id ? { ...item, status: action } : item
-          )
+            item.id === id ? { ...item, status: action } : item,
+          ),
         );
 
         // Update Database
@@ -180,8 +181,6 @@ const UserDashboard = () => {
   return (
     <div className="min-h-screen bg-brand-black text-white p-6 pb-20">
       {/* --- AREA RENDER NOTA (OFF-SCREEN / TERSEMBUNYI) --- */}
-      {/* Kita taruh di luar layar (absolute -left) agar tidak merusak tampilan dashboard, 
-          tapi tetap terbaca oleh html2pdf */}
       <div className="absolute -left-[9999px] top-0">
         <div id="nota-print-area">
           {notaData && <NotaInvoice data={notaData} />}
@@ -234,13 +233,9 @@ const UserDashboard = () => {
                 .replace(/^\[.*?\]/, "")
                 .trim();
 
-              // LOGIKA TOMBOL:
-              // Tampilkan Konfirmasi JIKA: Biaya > 0 DAN Status masih 'Pending'
               const showConfirmButtons =
                 item.total_cost > 0 && item.status === "Pending";
 
-              // Tampilkan Download PDF JIKA: Status sudah 'Working' (Proses) atau 'Done' (Selesai)
-              // DAN BIAYA SUDAH ADA
               const showPdfButton =
                 (item.status === "Working" || item.status === "Done") &&
                 item.total_cost > 0;
@@ -254,7 +249,6 @@ const UserDashboard = () => {
                       : "border-white/10 hover:border-brand-accent/30"
                   }`}
                 >
-                  {/* Highlight jika butuh konfirmasi */}
                   {showConfirmButtons && (
                     <div className="absolute top-0 left-0 w-1 h-full bg-brand-accent animate-pulse"></div>
                   )}
@@ -270,7 +264,7 @@ const UserDashboard = () => {
                         </span>
                         <span className="text-xs text-gray-400">
                           {new Date(item.created_at).toLocaleDateString(
-                            "id-ID"
+                            "id-ID",
                           )}
                         </span>
                       </div>
@@ -280,6 +274,21 @@ const UserDashboard = () => {
                       <p className="text-sm text-gray-400 line-clamp-2 max-w-2xl">
                         {descClean}
                       </p>
+
+                      {/* TAMPILKAN TEKNISI (FITUR BARU) */}
+                      {item.technician_name && (
+                        <div className="mt-3 inline-flex items-center gap-2 bg-brand-accent/5 px-3 py-1.5 rounded-lg border border-brand-accent/10">
+                          <div className="bg-brand-accent/20 p-1 rounded-full">
+                            <User size={12} className="text-brand-accent" />
+                          </div>
+                          <span className="text-xs text-gray-300">
+                            Teknisi:{" "}
+                            <span className="font-bold text-white">
+                              {item.technician_name}
+                            </span>
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex flex-col items-end gap-1 min-w-[140px]">
@@ -303,7 +312,6 @@ const UserDashboard = () => {
 
                   {/* --- FOOTER TOMBOL --- */}
                   <div className="mt-6 pt-4 border-t border-white/10 flex flex-wrap gap-3 justify-end items-center">
-                    {/* ALERT KONFIRMASI */}
                     {showConfirmButtons && (
                       <div className="flex-grow flex items-center gap-2 text-brand-accent text-sm font-bold bg-brand-accent/10 px-3 py-2 rounded-lg">
                         <AlertCircle size={16} className="animate-bounce" />
@@ -311,7 +319,6 @@ const UserDashboard = () => {
                       </div>
                     )}
 
-                    {/* TOMBOL LANJUT / BATAL */}
                     {showConfirmButtons && (
                       <>
                         <button
@@ -329,7 +336,6 @@ const UserDashboard = () => {
                       </>
                     )}
 
-                    {/* TOMBOL DOWNLOAD NOTA (PDF) */}
                     {showPdfButton && (
                       <button
                         onClick={() => handleDownloadPDF(item)}
@@ -339,7 +345,6 @@ const UserDashboard = () => {
                       </button>
                     )}
 
-                    {/* JIKA BATAL */}
                     {item.status === "Cancelled" && (
                       <span className="text-sm text-red-500 font-bold italic">
                         Pesanan telah dibatalkan.
