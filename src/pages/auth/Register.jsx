@@ -10,6 +10,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
+import Swal from "sweetalert2"; // IMPORT SWEETALERT
 
 const Register = () => {
   const navigate = useNavigate();
@@ -24,6 +25,7 @@ const Register = () => {
   const handleChange = (e) =>
     setFormData({ ...formData, [e.target.name]: e.target.value });
 
+  // --- FUNGSI REGISTER DENGAN SWEETALERT ---
   const handleRegister = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -49,10 +51,27 @@ const Register = () => {
         if (profileError) throw profileError;
       }
 
-      alert("🎉 Registrasi Berhasil! Silakan Login.");
+      // Pop-up Sukses
+      await Swal.fire({
+        title: "Registrasi Berhasil!",
+        text: "Akun Anda telah dibuat. Silakan login sekarang.",
+        icon: "success",
+        background: "#1e293b",
+        color: "#fff",
+        confirmButtonColor: "#f97316",
+        confirmButtonText: "Lanjut ke Login",
+      });
+
       navigate("/login");
     } catch (error) {
-      alert("❌ Gagal Daftar: " + error.message);
+      Swal.fire({
+        title: "Gagal Mendaftar",
+        text: error.message,
+        icon: "error",
+        background: "#1e293b",
+        color: "#fff",
+        confirmButtonColor: "#ef4444",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -60,14 +79,12 @@ const Register = () => {
 
   return (
     <div className="min-h-screen bg-brand-black flex items-center justify-center relative overflow-hidden p-6">
-      {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div className="absolute top-[-10%] right-[-10%] w-96 h-96 bg-brand-primary/20 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-[-10%] left-[-10%] w-96 h-96 bg-brand-accent/10 rounded-full blur-[120px]"></div>
       </div>
 
       <div className="relative z-10 w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl">
-        {/* --- TOMBOL KEMBALI KE HOME (UPDATE POSISI) --- */}
         <Link
           to="/"
           className="absolute top-6 left-6 text-gray-500 hover:text-white transition flex items-center gap-2 text-sm font-medium group"
@@ -88,7 +105,6 @@ const Register = () => {
         </div>
 
         <form onSubmit={handleRegister} className="space-y-5">
-          {/* Input Nama */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">
               Nama Lengkap
@@ -110,7 +126,6 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Input Email */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">
               Email Address
@@ -132,7 +147,6 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Input Password */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">
               Password

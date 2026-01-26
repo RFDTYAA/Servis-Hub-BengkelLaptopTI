@@ -9,26 +9,23 @@ import {
   Send,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
+import Swal from "sweetalert2"; // IMPORT SWEETALERT
 
 const Testimoni = () => {
   const [testimonials, setTestimonials] = useState([]);
   const [loading, setLoading] = useState(true);
-
-  // STATE BARU: Untuk Mengatur Modal & Form
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
-    role: "", // Misal: Mahasiswa TI
+    role: "",
     message: "",
-    rating: 5, // Default bintang 5
+    rating: 5,
   });
 
-  // 1. FUNGSI AMBIL DATA (READ)
   const fetchTestimonials = async () => {
     try {
       setLoading(true);
-      // PERBAIKAN: Menggunakan nama tabel 'testimonials'
       const { data, error } = await supabase
         .from("testimonials")
         .select("*")
@@ -47,31 +44,53 @@ const Testimoni = () => {
     fetchTestimonials();
   }, []);
 
-  // 2. FUNGSI KIRIM DATA (CREATE)
+  // --- FUNGSI KIRIM DENGAN SWEETALERT ---
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Mencegah reload halaman
+    e.preventDefault();
     setIsSubmitting(true);
 
     try {
-      // Validasi sederhana
       if (!formData.name || !formData.message) {
-        alert("Nama dan Pesan wajib diisi!");
+        Swal.fire({
+          title: "Data Tidak Lengkap",
+          text: "Mohon isi Nama dan Pesan ulasan Anda.",
+          icon: "warning",
+          background: "#1e293b",
+          color: "#fff",
+          confirmButtonColor: "#f97316",
+        });
         setIsSubmitting(false);
         return;
       }
 
-      // PERBAIKAN: Menggunakan nama tabel 'testimonials' (disamakan dengan saat fetch)
       const { error } = await supabase.from("testimonials").insert([formData]);
 
       if (error) throw error;
 
-      // Jika sukses:
-      alert("Terima kasih! Ulasan Anda berhasil dikirim.");
-      setIsModalOpen(false); // Tutup Modal
-      setFormData({ name: "", role: "", message: "", rating: 5 }); // Reset Form
-      fetchTestimonials(); // Refresh data agar ulasan baru langsung muncul
+      // Pop-up Sukses
+      Swal.fire({
+        title: "Terima Kasih!",
+        text: "Ulasan Anda berhasil dikirim dan akan tampil di halaman ini.",
+        icon: "success",
+        background: "#1e293b",
+        color: "#fff",
+        confirmButtonColor: "#f97316",
+        timer: 3000,
+        showConfirmButton: false,
+      });
+
+      setIsModalOpen(false);
+      setFormData({ name: "", role: "", message: "", rating: 5 });
+      fetchTestimonials();
     } catch (error) {
-      alert("Gagal mengirim ulasan: " + error.message);
+      Swal.fire({
+        title: "Gagal Mengirim",
+        text: error.message,
+        icon: "error",
+        background: "#1e293b",
+        color: "#fff",
+        confirmButtonColor: "#ef4444",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -79,7 +98,6 @@ const Testimoni = () => {
 
   return (
     <div className="bg-brand-black text-white min-h-screen py-20 relative">
-      {/* HEADER */}
       <div className="container mx-auto px-6 text-center mb-16">
         <span className="text-brand-accent font-bold tracking-widest uppercase text-sm mb-2 block">
           Kata Mereka
@@ -92,7 +110,6 @@ const Testimoni = () => {
           nyata mereka yang pernah servis di BengkelTl.
         </p>
 
-        {/* TOMBOL BUKA MODAL */}
         <button
           onClick={() => setIsModalOpen(true)}
           className="bg-white/5 hover:bg-brand-accent border border-white/10 text-white px-6 py-3 rounded-full font-bold transition flex items-center gap-2 mx-auto group shadow-lg hover:shadow-brand-accent/20"
@@ -105,7 +122,6 @@ const Testimoni = () => {
         </button>
       </div>
 
-      {/* GRID TESTIMONI */}
       <div className="container mx-auto px-6">
         {loading ? (
           <div className="flex flex-col items-center justify-center py-20">
@@ -132,7 +148,6 @@ const Testimoni = () => {
                   size={40}
                   className="absolute top-6 right-6 text-white/5 rotate-180"
                 />
-
                 <div className="flex gap-1 mb-4 text-brand-accent">
                   {[...Array(5)].map((_, i) => (
                     <Star
@@ -145,11 +160,9 @@ const Testimoni = () => {
                     />
                   ))}
                 </div>
-
                 <p className="text-gray-300 leading-relaxed mb-8 italic flex-grow">
                   "{item.message}"
                 </p>
-
                 <div className="flex items-center gap-4 border-t border-white/5 pt-6 mt-auto">
                   <div className="w-12 h-12 bg-gradient-to-br from-brand-accent to-brand-cyan rounded-full flex items-center justify-center text-white font-bold shadow-md shrink-0">
                     <User size={20} />
@@ -169,24 +182,20 @@ const Testimoni = () => {
         )}
       </div>
 
-      {/* --- MODAL FORM (POP-UP) --- */}
+      {/* MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-brand-dark border border-white/10 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative animate-in fade-in zoom-in duration-200">
-            {/* Tombol Close */}
             <button
               onClick={() => setIsModalOpen(false)}
               className="absolute top-4 right-4 text-gray-400 hover:text-white bg-white/5 hover:bg-red-500/20 p-2 rounded-full transition"
             >
               <X size={20} />
             </button>
-
             <h2 className="text-2xl font-bold mb-6 text-white">
               Bagikan Pengalamanmu
             </h2>
-
             <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Input Nama */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1">
                   Nama Lengkap
@@ -202,8 +211,6 @@ const Testimoni = () => {
                   }
                 />
               </div>
-
-              {/* Input Role/Status */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1">
                   Program Studi / Status
@@ -218,8 +225,6 @@ const Testimoni = () => {
                   }
                 />
               </div>
-
-              {/* Input Rating Bintang */}
               <div>
                 <label className="block text-sm text-gray-400 mb-2">
                   Rating Kepuasan
@@ -240,8 +245,6 @@ const Testimoni = () => {
                   ))}
                 </div>
               </div>
-
-              {/* Input Pesan */}
               <div>
                 <label className="block text-sm text-gray-400 mb-1">
                   Pesan Ulasan
@@ -257,8 +260,6 @@ const Testimoni = () => {
                   }
                 ></textarea>
               </div>
-
-              {/* Tombol Submit */}
               <button
                 type="submit"
                 disabled={isSubmitting}

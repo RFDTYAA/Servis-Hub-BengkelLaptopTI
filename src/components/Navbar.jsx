@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
 import { Menu, X, User, LogOut, ChevronDown, Settings } from "lucide-react";
+import Swal from "sweetalert2"; // IMPORT SWEETALERT
 
 const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // --- STATE USER (Ambil langsung dari Storage biar cepat) ---
+  // --- STATE USER ---
   const [userRole, setUserRole] = useState(() =>
     localStorage.getItem("userRole"),
   );
@@ -21,17 +22,14 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
-  // --- 1. FUNGSI CEK USER (JALAN OTOMATIS) ---
+  // --- FUNGSI CEK USER ---
   const checkUser = async () => {
-    // Cek Sesi Auth Supabase
     const {
       data: { user },
     } = await supabase.auth.getUser();
 
     if (user) {
       setUserEmail(user.email);
-
-      // Ambil detail Role dari tabel 'profiles'
       const { data: profile } = await supabase
         .from("profiles")
         .select("role, full_name, avatar_url")
@@ -39,41 +37,60 @@ const Navbar = () => {
         .single();
 
       if (profile) {
-        // UPDATE STATE & STORAGE
         setUserRole(profile.role);
         setUserName(profile.full_name);
         setUserAvatar(profile.avatar_url);
-
         localStorage.setItem("userRole", profile.role);
         localStorage.setItem("userName", profile.full_name);
       }
     } else {
-      // Jika tidak ada user (Guest), bersihkan data
       localStorage.removeItem("userRole");
       localStorage.removeItem("userName");
       setUserRole(null);
     }
   };
 
-  // Jalankan Cek User saat halaman dimuat
   useEffect(() => {
     checkUser();
-
-    // Listener jika user login/logout di tab lain
     const { data: authListener } = supabase.auth.onAuthStateChange(() => {
       checkUser();
     });
-
     return () => authListener.subscription.unsubscribe();
   }, [location.pathname]);
 
+  // --- FUNGSI LOGOUT DENGAN SWEETALERT ---
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    localStorage.clear();
-    setUserRole(null);
-    setUserName(null);
-    setIsProfileOpen(false);
-    navigate("/login");
+    const result = await Swal.fire({
+      title: "Yakin ingin keluar?",
+      text: "Anda harus login kembali untuk mengakses dashboard.",
+      icon: "question",
+      showCancelButton: true,
+      background: "#1e293b",
+      color: "#fff",
+      confirmButtonColor: "#ef4444", // Merah
+      cancelButtonColor: "#334155", // Abu-abu
+      confirmButtonText: "Ya, Keluar",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      await supabase.auth.signOut();
+      localStorage.clear();
+      setUserRole(null);
+      setUserName(null);
+      setIsProfileOpen(false);
+
+      Swal.fire({
+        title: "Berhasil Keluar",
+        icon: "success",
+        background: "#1e293b",
+        color: "#fff",
+        showConfirmButton: false,
+        timer: 1500,
+      });
+
+      navigate("/login");
+    }
   };
 
   const isActive = (path) => {
@@ -96,9 +113,8 @@ const Navbar = () => {
           BengkelLaptop<span className="text-brand-accent">TI.</span>
         </Link>
 
-        {/* --- MENU TENGAH (SESUAI REQUEST) --- */}
+        {/* --- MENU TENGAH --- */}
         <div className="hidden md:flex gap-6 lg:gap-8 text-sm lg:text-base font-medium items-center h-full">
-          {/* 1. GUEST (Tanpa Login) */}
           {!userRole && (
             <>
               <Link to="/" className={isActive("/")}>
@@ -116,7 +132,6 @@ const Navbar = () => {
             </>
           )}
 
-          {/* 2. ADMIN */}
           {userRole === "admin" && (
             <>
               <Link
@@ -143,7 +158,6 @@ const Navbar = () => {
             </>
           )}
 
-          {/* 3. CUSTOMER (PELANGGAN) */}
           {userRole === "customer" && (
             <>
               <Link
@@ -163,8 +177,7 @@ const Navbar = () => {
               </Link>
               <Link to="/dashboard/user" className={isActive("/cek-status")}>
                 Cek Status
-              </Link>{" "}
-              {/* Link ke Dashboard krn Status ada disana */}
+              </Link>
               <Link to="/testimoni" className={isActive("/testimoni")}>
                 Testimoni
               </Link>
@@ -182,13 +195,11 @@ const Navbar = () => {
               Login
             </Link>
           ) : (
-            /* DROPDOWN PROFIL */
             <div className="relative z-50">
               <button
                 onClick={() => setIsProfileOpen(!isProfileOpen)}
                 className="flex items-center gap-3 bg-white/5 hover:bg-white/10 border border-white/10 px-5 py-2 rounded-full transition focus:outline-none h-14"
               >
-                {/* Logic Foto Profil */}
                 {userAvatar ? (
                   <img
                     src={userAvatar}
@@ -200,27 +211,21 @@ const Navbar = () => {
                     <User size={20} />
                   </div>
                 )}
-
-                {/* Nama User */}
                 <span className="font-bold text-base max-w-[150px] truncate">
                   {userName || (userRole === "admin" ? "Admin" : "Pelanggan")}
                 </span>
                 <ChevronDown
                   size={18}
-                  className={`text-gray-400 transition transform ${
-                    isProfileOpen ? "rotate-180" : ""
-                  }`}
+                  className={`text-gray-400 transition transform ${isProfileOpen ? "rotate-180" : ""}`}
                 />
               </button>
 
-              {/* ISI MENU DROPDOWN */}
               {isProfileOpen && (
                 <div className="absolute right-0 mt-4 w-80 bg-brand-dark border border-white/10 rounded-xl shadow-2xl overflow-hidden animate-in fade-in slide-in-from-top-2">
                   <div className="p-5 border-b border-white/5 bg-black/30">
                     <p className="text-xs text-gray-500 uppercase tracking-widest mb-2">
                       Signed in as
                     </p>
-
                     <div className="flex flex-col gap-1 mb-1">
                       <span className="text-white font-bold text-lg truncate">
                         {userName}
@@ -229,12 +234,10 @@ const Navbar = () => {
                         {userEmail}
                       </span>
                     </div>
-
                     <span className="inline-block bg-brand-accent/20 text-brand-accent border border-brand-accent/20 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider mt-1">
                       {userRole}
                     </span>
                   </div>
-
                   <div className="p-2">
                     <Link
                       to="/profile"
@@ -243,9 +246,7 @@ const Navbar = () => {
                     >
                       <Settings size={18} /> Kelola Akun
                     </Link>
-
                     <div className="h-px bg-white/5 my-1 mx-2"></div>
-
                     <button
                       onClick={handleLogout}
                       className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition text-left"
@@ -270,11 +271,10 @@ const Navbar = () => {
         </div>
       </div>
 
-      {/* --- MOBILE MENU (Dropdown HP) --- */}
+      {/* MOBILE MENU */}
       {isOpen && (
         <div className="md:hidden bg-brand-dark border-t border-white/10 p-6 absolute w-full left-0 top-full shadow-2xl z-40">
           <div className="flex flex-col gap-6 font-medium text-lg">
-            {/* 1. GUEST MOBILE */}
             {!userRole && (
               <>
                 <Link to="/" onClick={() => setIsOpen(false)}>
@@ -298,8 +298,6 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-
-            {/* 2. ADMIN MOBILE */}
             {userRole === "admin" && (
               <>
                 <Link to="/dashboard/admin" onClick={() => setIsOpen(false)}>
@@ -322,8 +320,6 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-
-            {/* 3. CUSTOMER MOBILE */}
             {userRole === "customer" && (
               <>
                 <Link to="/dashboard/user" onClick={() => setIsOpen(false)}>
@@ -343,8 +339,6 @@ const Navbar = () => {
                 </Link>
               </>
             )}
-
-            {/* TOMBOL LOGOUT MOBILE */}
             {userRole && (
               <div className="border-t border-white/10 pt-4 mt-2">
                 <div className="mb-4">
@@ -352,7 +346,6 @@ const Navbar = () => {
                     {userName}
                   </p>
                   <p className="text-xs text-gray-500 mb-4">{userEmail}</p>
-
                   <Link
                     to="/profile"
                     onClick={() => setIsOpen(false)}
@@ -360,7 +353,6 @@ const Navbar = () => {
                   >
                     <Settings size={16} /> Kelola Akun
                   </Link>
-
                   <button
                     onClick={() => {
                       handleLogout();

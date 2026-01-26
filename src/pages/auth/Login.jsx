@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2"; // Import SweetAlert
 import {
   Mail,
   Lock,
@@ -21,12 +22,13 @@ const Login = () => {
   // STATE BARU: Mode Lupa Password
   const [isResetMode, setIsResetMode] = useState(false);
 
-  // --- 1. FUNGSI LOGIN ---
+  // --- 1. FUNGSI LOGIN (SUDAH DIPERBAIKI DENGAN SWEETALERT) ---
   const handleLogin = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
+      // Login ke Supabase
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -34,6 +36,7 @@ const Login = () => {
 
       if (error) throw error;
 
+      // Ambil data Profile (Role)
       const { data: profile, error: profileError } = await supabase
         .from("profiles")
         .select("*")
@@ -42,37 +45,76 @@ const Login = () => {
 
       if (profileError) throw profileError;
 
+      // Simpan ke LocalStorage
       localStorage.setItem("userRole", profile.role);
       localStorage.setItem("userName", profile.full_name);
 
-      alert(`✅ Login Berhasil!`);
-      if (profile.role === "admin") window.location.href = "/dashboard/admin";
-      else navigate("/dashboard/user");
+      // POP-UP SUKSES LOGIN
+      Swal.fire({
+        title: "Login Berhasil!",
+        text: `Selamat datang kembali, ${profile.full_name}!`,
+        icon: "success",
+        background: "#1e293b", // Warna Gelap
+        color: "#fff", // Teks Putih
+        confirmButtonColor: "#f97316", // Warna Brand (Orange)
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => {
+        // Redirect setelah alert ditutup
+        if (profile.role === "admin") {
+          navigate("/dashboard/admin");
+        } else {
+          navigate("/dashboard/user");
+        }
+      });
     } catch (error) {
-      alert("❌ Login Gagal: " + error.message);
+      // POP-UP GAGAL LOGIN
+      Swal.fire({
+        title: "Login Gagal",
+        text: error.message || "Email atau password salah!",
+        icon: "error",
+        background: "#1e293b",
+        color: "#fff",
+        confirmButtonColor: "#ef4444",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- 2. FUNGSI RESET PASSWORD (BARU) ---
+  // --- 2. FUNGSI RESET PASSWORD (SUDAH DIPERBAIKI DENGAN SWEETALERT) ---
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: "http://localhost:5173/update-password", // Nanti kita buat halaman ini jika perlu
+        redirectTo: "http://localhost:5173/update-password",
       });
 
       if (error) throw error;
 
-      alert(
-        "📧 Link reset password telah dikirim ke email Anda! Silakan cek inbox/spam."
-      );
+      // POP-UP SUKSES RESET
+      Swal.fire({
+        title: "Email Terkirim!",
+        text: "Link reset password telah dikirim ke email Anda. Silakan cek Inbox atau Spam.",
+        icon: "success",
+        background: "#1e293b",
+        color: "#fff",
+        confirmButtonColor: "#f97316",
+      });
+
       setIsResetMode(false); // Balik ke mode login
     } catch (error) {
-      alert("❌ Gagal mengirim email: " + error.message);
+      // POP-UP GAGAL RESET
+      Swal.fire({
+        title: "Gagal Mengirim",
+        text: error.message,
+        icon: "error",
+        background: "#1e293b",
+        color: "#fff",
+        confirmButtonColor: "#ef4444",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -87,7 +129,7 @@ const Login = () => {
       </div>
 
       <div className="relative z-10 w-full max-w-md bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl transition-all duration-300">
-        {/* --- TOMBOL KEMBALI KE HOME (BARU: DI POJOK KIRI ATAS) --- */}
+        {/* --- TOMBOL KEMBALI KE HOME --- */}
         <Link
           to="/"
           className="absolute top-6 left-6 text-gray-500 hover:text-white transition flex items-center gap-2 text-sm font-medium group"
@@ -117,7 +159,7 @@ const Login = () => {
           onSubmit={isResetMode ? handleResetPassword : handleLogin}
           className="space-y-6"
         >
-          {/* EMAIL INPUT (Selalu Muncul) */}
+          {/* EMAIL INPUT */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-gray-300">
               Email Address
@@ -138,14 +180,13 @@ const Login = () => {
             </div>
           </div>
 
-          {/* PASSWORD INPUT (Hanya di Mode Login) */}
+          {/* PASSWORD INPUT */}
           {!isResetMode && (
             <div className="space-y-2 animate-in slide-in-from-top-2 fade-in">
               <div className="flex justify-between">
                 <label className="text-sm font-medium text-gray-300">
                   Password
                 </label>
-                {/* TOMBOL MEMICU MODE RESET */}
                 <button
                   type="button"
                   onClick={() => setIsResetMode(true)}
@@ -178,7 +219,7 @@ const Login = () => {
             </div>
           )}
 
-          {/* TOMBOL SUBMIT DINAMIS */}
+          {/* TOMBOL SUBMIT */}
           <button
             type="submit"
             disabled={isLoading}
