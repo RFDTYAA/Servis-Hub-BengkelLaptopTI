@@ -45,6 +45,7 @@ const CekStatus = () => {
   const [transactions, setTransactions] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // --- FETCH DATA ---
   useEffect(() => {
     const fetchUserTransactions = async () => {
       try {
@@ -56,6 +57,7 @@ const CekStatus = () => {
           return;
         }
 
+        // Ambil data terbaru (Realtime-ish via fetch ulang)
         const { data, error } = await supabase
           .from("transactions")
           .select(`*, profiles:user_id(full_name)`)
@@ -73,46 +75,51 @@ const CekStatus = () => {
     fetchUserTransactions();
   }, [navigate]);
 
+  // --- LOGIC PROGRESS STEPS (INTEGRASI BARU) ---
   const getProgressSteps = (item) => {
+    // Definisi Status Aktif
+    // "Working" berarti sudah disetujui DAN sedang dikerjakan.
+    const isApproved = ["Working", "Selesai", "Done", "Approved"].includes(
+      item.status,
+    );
+    const isWorking = ["Working", "Selesai", "Done"].includes(item.status);
+    const isDone = ["Selesai", "Done"].includes(item.status);
+
     const steps = [
       {
         id: 1,
         title: "Pengajuan",
-        desc: "Data diterima",
+        desc: "Data diterima sistem",
         icon: FileSearch,
         active: true,
       },
       {
         id: 2,
         title: "Pemeriksaan",
-        desc: item.total_cost > 0 ? "Biaya dikonfirmasi" : "Cek kerusakan",
+        desc: item.total_cost > 0 ? "Biaya telah keluar" : "Pengecekan teknisi",
         icon: DollarSign,
         active: item.total_cost > 0,
       },
       {
         id: 3,
         title: "Persetujuan",
-        desc: ["Approved", "Working", "Selesai", "Done"].includes(item.status)
-          ? "Disetujui"
-          : "Menunggu Anda",
+        desc: isApproved ? "Biaya disetujui" : "Menunggu konfirmasi Anda",
         icon: Smartphone,
-        active: ["Approved", "Working", "Selesai", "Done"].includes(
-          item.status,
-        ),
+        active: isApproved,
       },
       {
         id: 4,
         title: "Pengerjaan",
-        desc: "Sedang diperbaiki",
+        desc: isWorking ? "Teknisi sedang bekerja" : "Menunggu antrian",
         icon: Wrench,
-        active: ["Working", "Selesai", "Done"].includes(item.status),
+        active: isWorking,
       },
       {
         id: 5,
         title: "Selesai",
-        desc: "Siap diambil",
+        desc: isDone ? "Siap diambil" : "Tahap akhir",
         icon: CheckCircle2,
-        active: ["Selesai", "Done"].includes(item.status),
+        active: isDone,
       },
     ];
     return steps;
@@ -130,18 +137,13 @@ const CekStatus = () => {
       minimumFractionDigits: 0,
     }).format(n);
 
-  // --- LOGIC PESAN WA OTOMATIS ---
   const handleContactAdmin = (item) => {
-    const phoneNumber = "6282125548653"; // Ganti Nomor Admin
-    const message = `Halo Admin Bengkel TI, saya ingin menanyakan status perbaikan untuk perangkat:
-    
-📱 *${item.device_name}*
-🆔 ID Servis: ${item.id.slice(0, 8)}
-    
-Mohon informasinya. Terima kasih!`;
-
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
+    const phoneNumber = "6282125548653";
+    const message = `Halo Admin, saya mau tanya status servis ID #${item.id.slice(0, 8)} (${item.device_name}).`;
+    window.open(
+      `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`,
+      "_blank",
+    );
   };
 
   if (loading) {
@@ -158,6 +160,7 @@ Mohon informasinya. Terima kasih!`;
       <div className="fixed top-0 left-0 w-full h-full bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-brand-accent/10 via-brand-black to-brand-black pointer-events-none -z-10"></div>
 
       <div className="container mx-auto max-w-7xl relative z-10">
+        {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-end mb-10 pb-6 border-b border-white/10 gap-4">
           <div>
             <h1 className="text-3xl md:text-4xl font-extrabold mb-2">
@@ -176,6 +179,7 @@ Mohon informasinya. Terima kasih!`;
           </Link>
         </div>
 
+        {/* --- LIST SERVIS --- */}
         {transactions.length === 0 ? (
           <div className="bg-white/5 border border-white/10 border-dashed rounded-3xl p-16 text-center max-w-2xl mx-auto">
             <LayoutDashboard size={48} className="mx-auto text-gray-600 mb-4" />
@@ -193,6 +197,7 @@ Mohon informasinya. Terima kasih!`;
                 item.status === "Dibatalkan" || item.status === "Cancelled";
               const isDone =
                 item.status === "Selesai" || item.status === "Done";
+              const isWorking = item.status === "Working";
               const steps = getProgressSteps(item);
 
               return (
@@ -201,21 +206,29 @@ Mohon informasinya. Terima kasih!`;
                   className="bg-brand-dark/60 backdrop-blur-xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl hover:border-brand-accent/30 transition duration-500 group"
                 >
                   <div className="grid grid-cols-1 lg:grid-cols-12 min-h-[300px]">
-                    {/* BAGIAN KIRI */}
+                    {/* BAGIAN KIRI: INFO UTAMA */}
                     <div className="lg:col-span-5 p-8 border-b lg:border-b-0 lg:border-r border-white/5 flex flex-col justify-between bg-white/[0.02]">
                       <div>
+                        {/* Status Badge Dinamis */}
                         <div className="mb-6">
-                          {isCancelled ? (
+                          {isCancelled && (
                             <span className="inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl font-bold text-sm tracking-wider uppercase">
                               <XCircle size={18} /> Dibatalkan
                             </span>
-                          ) : isDone ? (
+                          )}
+                          {isDone && (
                             <span className="inline-flex items-center gap-2 px-4 py-2 bg-green-500/10 text-green-500 border border-green-500/20 rounded-xl font-bold text-sm tracking-wider uppercase shadow-[0_0_15px_rgba(34,197,94,0.3)]">
                               <CheckCircle2 size={18} /> Selesai
                             </span>
-                          ) : (
+                          )}
+                          {isWorking && (
                             <span className="inline-flex items-center gap-2 px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/20 rounded-xl font-bold text-sm tracking-wider uppercase animate-pulse">
-                              <Clock size={18} /> Sedang Diproses
+                              <Wrench size={18} /> Sedang Dikerjakan
+                            </span>
+                          )}
+                          {item.status === "Pending" && (
+                            <span className="inline-flex items-center gap-2 px-4 py-2 bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 rounded-xl font-bold text-sm tracking-wider uppercase">
+                              <Clock size={18} /> Menunggu
                             </span>
                           )}
                         </div>
@@ -243,7 +256,7 @@ Mohon informasinya. Terima kasih!`;
                             <p className="text-2xl font-mono font-bold text-brand-cyan">
                               {item.total_cost > 0
                                 ? formatRupiah(item.total_cost)
-                                : "Menunggu"}
+                                : "Menunggu Cek"}
                             </p>
                             <span className="text-xs flex items-center gap-1 text-gray-400 border border-white/10 px-2 py-1 rounded bg-white/5">
                               <CreditCard size={12} />{" "}
@@ -327,6 +340,7 @@ Mohon informasinya. Terima kasih!`;
                                   <p className="text-xs text-gray-500 hidden lg:block mt-1">
                                     {step.desc}
                                   </p>
+                                  {/* Mobile Desc */}
                                   <p className="text-xs text-gray-500 lg:hidden">
                                     {step.desc}
                                   </p>
@@ -337,7 +351,7 @@ Mohon informasinya. Terima kasih!`;
                         </div>
                       )}
 
-                      {/* Footer Timeline: Tombol WA */}
+                      {/* Footer Timeline */}
                       <div className="mt-8 pt-6 border-t border-white/5 flex justify-end">
                         <button
                           onClick={() => handleContactAdmin(item)}

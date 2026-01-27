@@ -14,7 +14,9 @@ import {
   CreditCard,
   UserCheck,
   AlertTriangle,
+  MessageSquare,
   Loader2,
+  Wrench,
 } from "lucide-react";
 import Swal from "sweetalert2";
 
@@ -36,7 +38,6 @@ const TECHNICIANS_DATA = [
   { name: "Farrel Ghozy Afifuddin", img: fotofarrel },
   { name: "Muhammad Wildan", img: fotowildan },
   { name: "Raja Muhammad", img: fotoraja },
-  { name: "Jauhan Ahmad", img: fotojauhan },
 ];
 
 const Transaksi = () => {
@@ -44,22 +45,27 @@ const Transaksi = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  // Data Edit
   const [editData, setEditData] = useState({
     id: null,
     status: "",
     cost: 0,
     technician: "",
     paymentType: "Cash",
+    userPhone: "",
+    userName: "",
+    deviceName: "",
+    originalStatus: "",
   });
 
-  // --- 1. FETCH HANYA YANG AKTIF (Pending, Approved, Working) ---
   const fetchTransactions = async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from("transactions")
-        .select(`*, profiles:user_id (full_name, email)`)
-        .in("status", ["Pending", "Approved", "Working"]) // FILTER UTAMA
+        .select(`*, profiles:user_id (full_name, email, phone_number)`)
+        .in("status", ["Pending", "Approved", "Working"]) // Ambil semua status aktif
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -84,7 +90,6 @@ const Transaksi = () => {
       background: "#1e293b",
       color: "#fff",
       confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#334155",
       confirmButtonText: "Ya, Hapus!",
     });
     if (result.isConfirmed) {
@@ -100,12 +105,34 @@ const Transaksi = () => {
       cost: item.total_cost || 0,
       technician: item.technician_name || "",
       paymentType: item.payment_type || "Cash",
+      userPhone: item.profiles?.phone_number || "",
+      userName: item.profiles?.full_name || "Pelanggan",
+      deviceName: item.device_name,
+      originalStatus: item.status,
     });
     setIsEditOpen(true);
   };
 
   const handleSaveEdit = async (e) => {
     e.preventDefault();
+
+    // --- PROTEKSI ALUR ---
+    // Jika masih Pending, Admin TIDAK BOLEH ubah ke Working sendiri.
+    // Harus User yang klik tombol "Setuju" di dashboard mereka.
+    if (
+      editData.originalStatus === "Pending" &&
+      editData.status === "Working"
+    ) {
+      Swal.fire({
+        icon: "error",
+        title: "Tunggu Pelanggan!",
+        text: 'Pelanggan BELUM menyetujui biaya. Biarkan status "Pending" sampai pelanggan klik "Setuju" di dashboard mereka. Status akan otomatis berubah jadi "Working".',
+        background: "#1e293b",
+        color: "#fff",
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from("transactions")
@@ -128,10 +155,33 @@ const Transaksi = () => {
         timer: 1500,
       });
       setIsEditOpen(false);
-      fetchTransactions(); // Refresh data (data selesai akan hilang dr list ini)
+      fetchTransactions();
     } catch (error) {
       Swal.fire("Gagal", error.message, "error");
     }
+  };
+
+  const sendWANotification = () => {
+    if (!editData.userPhone || editData.userPhone.length < 5) {
+      Swal.fire("Error", "No WA Pelanggan tidak valid.", "error");
+      return;
+    }
+    let phone = editData.userPhone.replace(/\D/g, "");
+    if (phone.startsWith("0")) phone = "62" + phone.slice(1);
+
+    const message = `Halo Kak ${editData.userName},
+    
+Info Servis: *${editData.deviceName}*
+Teknisi: ${editData.technician || "-"}
+Biaya: Rp ${parseInt(editData.cost).toLocaleString("id-ID")}
+    
+Mohon Buka Dashboard & Klik *SETUJU* agar bisa langsung dikerjakan.
+Link: https://bengkellaptopti.com/dashboard/user`;
+
+    window.open(
+      `https://wa.me/${phone}?text=${encodeURIComponent(message)}`,
+      "_blank",
+    );
   };
 
   const getTechPhoto = (name) => {
@@ -154,7 +204,9 @@ const Transaksi = () => {
           <h1 className="text-3xl font-bold mb-1 flex items-center gap-2 text-brand-accent">
             <Smartphone /> Transaksi Aktif
           </h1>
-          <p className="text-gray-400">Kelola antrian yang sedang berjalan.</p>
+          <p className="text-gray-400">
+            Kelola antrian. Input Harga & Teknisi, lalu tunggu User setuju.
+          </p>
         </div>
         <div className="relative w-full md:w-72">
           <Search className="absolute left-3 top-3 text-gray-400" size={18} />
@@ -189,15 +241,8 @@ const Transaksi = () => {
                     <Loader2 className="animate-spin inline mr-2" /> Memuat...
                   </td>
                 </tr>
-              ) : filteredData.length === 0 ? (
-                <tr>
-                  <td colSpan="7" className="p-8 text-center text-gray-500">
-                    Tidak ada transaksi aktif.
-                  </td>
-                </tr>
               ) : (
                 filteredData.map((item) => (
-                  // HOVER EFFECT: Minimalis (bg-white/5)
                   <tr
                     key={item.id}
                     className="hover:bg-white/5 transition-colors duration-200 group"
@@ -251,26 +296,23 @@ const Transaksi = () => {
                       ) : (
                         <span className="text-gray-500">Menunggu</span>
                       )}
-                      <div className="text-[10px] text-gray-500 mt-0.5 uppercase border border-white/10 px-1 rounded w-fit">
-                        {item.payment_type || "Cash"}
-                      </div>
                     </td>
                     <td className="p-4 align-top">
                       <span
                         className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wide border flex items-center w-fit gap-1 ${
                           item.status === "Working"
                             ? "bg-blue-500/10 text-blue-400 border-blue-500/20"
-                            : item.status === "Approved"
-                              ? "bg-purple-500/10 text-purple-400 border-purple-500/20"
-                              : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
+                            : "bg-yellow-500/10 text-yellow-500 border-yellow-500/20"
                         }`}
                       >
-                        {item.status === "Pending" && <Clock size={10} />}
-                        {item.status === "Approved" && <UserCheck size={10} />}
-                        {item.status === "Working" && (
-                          <Clock size={10} className="animate-spin" />
+                        {item.status === "Pending" ? (
+                          <Clock size={10} />
+                        ) : (
+                          <Wrench size={10} className="animate-pulse" />
                         )}
-                        {item.status}
+                        {item.status === "Working"
+                          ? "SEDANG DIKERJAKAN"
+                          : "MENUNGGU PERSETUJUAN"}
                       </span>
                     </td>
                     <td className="p-4 align-top text-center">
@@ -297,7 +339,7 @@ const Transaksi = () => {
         </div>
       </div>
 
-      {/* MODAL EDIT (SAMA SEPERTI SEBELUMNYA) */}
+      {/* --- MODAL EDIT --- */}
       {isEditOpen && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-brand-dark border border-white/10 rounded-2xl w-full max-w-lg shadow-2xl animate-in zoom-in duration-200">
@@ -309,24 +351,21 @@ const Transaksi = () => {
                 <X size={20} className="text-gray-400 hover:text-white" />
               </button>
             </div>
+
             <form onSubmit={handleSaveEdit} className="p-6 space-y-4">
-              <div>
-                <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
-                  Teknisi
-                </label>
-                <div className="relative">
-                  <UserCog
-                    className="absolute left-3 top-3 text-brand-accent"
-                    size={16}
-                  />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
+                    Teknisi
+                  </label>
                   <select
-                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 pl-9 text-sm text-white focus:border-brand-accent focus:outline-none"
+                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-brand-accent focus:outline-none"
                     value={editData.technician}
                     onChange={(e) =>
                       setEditData({ ...editData, technician: e.target.value })
                     }
                   >
-                    <option value="">-- Pilih Teknisi --</option>
+                    <option value="">-- Pilih --</option>
                     {TECHNICIANS_DATA.map((tech, i) => (
                       <option key={i} value={tech.name}>
                         {tech.name}
@@ -334,8 +373,6 @@ const Transaksi = () => {
                     ))}
                   </select>
                 </div>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
                     Biaya (Rp)
@@ -349,24 +386,20 @@ const Transaksi = () => {
                     }
                   />
                 </div>
-                <div>
-                  <label className="block text-xs font-bold text-gray-400 uppercase mb-1">
-                    Pembayaran
-                  </label>
-                  <select
-                    className="w-full bg-black/30 border border-white/10 rounded-lg p-2.5 text-sm text-white focus:border-brand-accent focus:outline-none"
-                    value={editData.paymentType}
-                    onChange={(e) =>
-                      setEditData({ ...editData, paymentType: e.target.value })
-                    }
-                  >
-                    <option value="Cash">Cash</option>
-                    <option value="Transfer">Transfer</option>
-                    <option value="QRIS">QRIS</option>
-                    <option value="Pending">Belum Bayar</option>
-                  </select>
-                </div>
               </div>
+
+              {/* NOTIFIKASI WA OPSIONAL */}
+              {editData.cost > 0 && editData.originalStatus === "Pending" && (
+                <button
+                  type="button"
+                  onClick={sendWANotification}
+                  className="w-full py-2 bg-green-500/10 text-green-400 border border-green-500/20 rounded-lg flex items-center justify-center gap-2 text-xs font-bold hover:bg-green-500 hover:text-white transition"
+                >
+                  <MessageSquare size={14} /> Beritahu User via WA (Opsional)
+                </button>
+              )}
+
+              {/* STATUS UPDATE */}
               <div className="bg-brand-accent/5 p-3 rounded-lg border border-brand-accent/20">
                 <label className="block text-xs font-bold text-brand-accent uppercase mb-1">
                   Status
@@ -378,25 +411,28 @@ const Transaksi = () => {
                     setEditData({ ...editData, status: e.target.value })
                   }
                 >
-                  <option value="Pending">Pending</option>
-                  <option value="Approved">Approved (Disetujui)</option>
-                  <option value="Working">Working (Proses)</option>
-                  <option value="Selesai">Selesai (Pindah ke Riwayat)</option>
-                  <option value="Dibatalkan">
-                    Dibatalkan (Pindah ke Riwayat)
-                  </option>
+                  <option value="Pending">Pending (Tunggu User)</option>
+
+                  {/* Working Muncul Jika User Sudah Setuju */}
+                  {editData.originalStatus !== "Pending" && (
+                    <option value="Working">Working (Sedang Dikerjakan)</option>
+                  )}
+
+                  <option value="Selesai">Selesai (Arsipkan)</option>
+                  <option value="Dibatalkan">Dibatalkan (Arsipkan)</option>
                 </select>
-                <div className="flex gap-2 mt-2 text-[10px] text-gray-400">
-                  <AlertTriangle
-                    size={12}
-                    className="text-yellow-500 shrink-0"
-                  />
-                  <span>
-                    Tunggu status <b>Approved</b> sebelum ubah ke <b>Working</b>
-                    .
-                  </span>
-                </div>
+
+                {editData.originalStatus === "Pending" && (
+                  <div className="flex items-start gap-2 mt-2 text-[10px] text-yellow-500">
+                    <AlertTriangle size={12} className="shrink-0 mt-0.5" />
+                    <span>
+                      <b>Info:</b> Biarkan "Pending" hingga User klik "Setuju".
+                      Nanti status otomatis berubah jadi "Working".
+                    </span>
+                  </div>
+                )}
               </div>
+
               <button
                 type="submit"
                 className="w-full bg-brand-accent hover:bg-orange-600 text-white font-bold py-3 rounded-lg transition"

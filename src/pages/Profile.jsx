@@ -8,8 +8,10 @@ import {
   Save,
   Loader2,
   LogOut,
-} from "lucide-react";
+  Phone,
+} from "lucide-react"; // Import Phone
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -22,6 +24,7 @@ const Profile = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState(""); // State baru untuk No HP
 
   // 1. FETCH DATA USER
   useEffect(() => {
@@ -42,7 +45,7 @@ const Profile = () => {
         // Ambil detail dari tabel profiles
         const { data, error } = await supabase
           .from("profiles")
-          .select("full_name, role, avatar_url")
+          .select("full_name, role, avatar_url, phone_number") // Tambahkan phone_number
           .eq("id", user.id)
           .single();
 
@@ -51,12 +54,13 @@ const Profile = () => {
         }
 
         if (data) {
-          setFullName(data.full_name);
-          setRole(data.role);
-          setAvatarUrl(data.avatar_url);
+          setFullName(data.full_name || "");
+          setRole(data.role || "");
+          setAvatarUrl(data.avatar_url || null);
+          setPhoneNumber(data.phone_number || ""); // Set phone_number
         }
       } catch (error) {
-        alert("Error loading user data!");
+        Swal.fire("Error", "Gagal memuat data profil!", "error");
         console.log(error);
       } finally {
         setLoading(false);
@@ -107,23 +111,37 @@ const Profile = () => {
       // Update State Lokal & LocalStorage agar Navbar berubah
       setAvatarUrl(publicUrl);
       localStorage.setItem("userAvatar", publicUrl); // Simpan sementara
-      alert("Foto profil berhasil diperbarui!");
+      Swal.fire({
+        title: "Berhasil!",
+        text: "Foto profil berhasil diperbarui.",
+        icon: "success",
+        background: "#1e293b",
+        color: "#fff",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     } catch (error) {
-      alert("Gagal upload: " + error.message);
+      Swal.fire("Gagal", error.message, "error");
     } finally {
       setUpdating(false);
     }
   };
 
-  // 3. FUNGSI UPDATE DATA TEKS (Nama)
+  // 3. FUNGSI UPDATE DATA PROFIL (Nama & No HP)
   const updateProfile = async (e) => {
     e.preventDefault();
     try {
       setUpdating(true);
 
+      const updates = {
+        full_name: fullName,
+        phone_number: phoneNumber, // Update phone_number
+        updated_at: new Date(),
+      };
+
       const { error } = await supabase
         .from("profiles")
-        .update({ full_name: fullName })
+        .update(updates)
         .eq("id", session.id);
 
       if (error) throw error;
@@ -131,9 +149,17 @@ const Profile = () => {
       // Update LocalStorage agar Navbar berubah
       localStorage.setItem("userName", fullName);
 
-      alert("Profil berhasil disimpan!");
+      Swal.fire({
+        title: "Berhasil!",
+        text: "Profil berhasil disimpan.",
+        icon: "success",
+        background: "#1e293b",
+        color: "#fff",
+        showConfirmButton: false,
+        timer: 1500,
+      });
     } catch (error) {
-      alert("Gagal update: " + error.message);
+      Swal.fire("Gagal", error.message, "error");
     } finally {
       setUpdating(false);
     }
@@ -148,7 +174,7 @@ const Profile = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-brand-black flex items-center justify-center text-white">
-        Loading Profile...
+        <Loader2 size={48} className="text-brand-accent animate-spin mb-4" />
       </div>
     );
   }
@@ -229,12 +255,35 @@ const Profile = () => {
             </div>
           </div>
 
+          {/* NOMOR WHATSAPP (BARU) */}
+          <div className="space-y-2">
+            <label className="text-xs font-bold text-brand-accent uppercase tracking-wider ml-1">
+              Nomor WhatsApp
+            </label>
+            <div className="relative">
+              <Phone
+                className="absolute left-4 top-3.5 text-brand-accent"
+                size={18}
+              />
+              <input
+                type="text"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+                placeholder="08xxxxxxxxxx"
+                className="w-full bg-black/40 border border-brand-accent/30 rounded-xl py-3 pl-11 pr-4 text-white focus:outline-none focus:border-brand-accent focus:ring-1 focus:ring-brand-accent transition"
+              />
+            </div>
+            <p className="text-[10px] text-gray-500 ml-1">
+              *Penting untuk notifikasi status servis.
+            </p>
+          </div>
+
           {/* EMAIL (Read Only) */}
           <div className="space-y-2">
             <label className="text-xs font-bold text-gray-400 uppercase tracking-wider ml-1">
               Email Address
             </label>
-            <div className="relative">
+            <div className="relative opacity-70">
               <Mail
                 className="absolute left-4 top-3.5 text-gray-500"
                 size={18}
