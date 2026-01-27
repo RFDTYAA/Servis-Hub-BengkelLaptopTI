@@ -175,7 +175,7 @@ const Navbar = () => {
               <Link to="/pricing" className={isActive("/pricing")}>
                 Katalog Harga
               </Link>
-              <Link to="/dashboard/user" className={isActive("/cek-status")}>
+              <Link to="/cek-status" className={isActive("/cek-status")}>
                 Cek Status
               </Link>
               <Link to="/testimoni" className={isActive("/testimoni")}>

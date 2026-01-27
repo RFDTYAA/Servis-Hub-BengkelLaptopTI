@@ -4,7 +4,7 @@ import {
   Routes,
   Route,
   Navigate,
-  useLocation, // 1. Import useLocation
+  useLocation,
 } from "react-router-dom";
 
 // --- IMPORT KOMPONEN UI (Layout) ---
@@ -16,6 +16,7 @@ import Home from "./pages/Home";
 import About from "./pages/About";
 import Pricing from "./pages/Pricing";
 import Testimoni from "./pages/Testimoni";
+import CekStatus from "./pages/CekStatus"; // <--- TAMBAHAN: Import Halaman Cek Status
 
 // --- IMPORT HALAMAN AUTH ---
 import Login from "./pages/auth/Login";
@@ -32,7 +33,7 @@ import AdminTransaksi from "./pages/dashboard/admin/Transaksi";
 import AdminRiwayat from "./pages/dashboard/admin/Riwayat";
 
 // ==========================================
-// 0. KOMPONEN SCROLL TO TOP (BARU)
+// 0. KOMPONEN SCROLL TO TOP
 // ==========================================
 const ScrollToTop = () => {
   const { pathname } = useLocation();
@@ -109,6 +110,15 @@ function App() {
           element={
             <Layout>
               <Testimoni />
+            </Layout>
+          }
+        />
+        {/* TAMBAHAN: Route Cek Status */}
+        <Route
+          path="/cek-status"
+          element={
+            <Layout>
+              <CekStatus />
             </Layout>
           }
         />
