@@ -8,13 +8,11 @@ import {
   Wrench,
   ShieldCheck,
   Zap,
-  MessageSquare, // Icon tambahan untuk WA
+  MessageSquare,
 } from "lucide-react";
 
 const Pricing = () => {
   const [searchTerm, setSearchTerm] = useState("");
-
-  // Nomor Admin (Ganti dengan nomor Anda)
   const phoneNumber = "6282125548653";
 
   // Fungsi Helper untuk Link WA Per Item

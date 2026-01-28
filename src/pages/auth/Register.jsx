@@ -10,7 +10,7 @@ import {
   EyeOff,
 } from "lucide-react";
 import { supabase } from "../../lib/supabaseClient";
-import Swal from "sweetalert2"; // IMPORT SWEETALERT
+import Swal from "sweetalert2";
 
 const Register = () => {
   const navigate = useNavigate();

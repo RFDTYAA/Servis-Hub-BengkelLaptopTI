@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabaseClient";
-import Swal from "sweetalert2"; // IMPORT SWEETALERT
+import Swal from "sweetalert2";
 import {
   Wrench,
   Calendar,

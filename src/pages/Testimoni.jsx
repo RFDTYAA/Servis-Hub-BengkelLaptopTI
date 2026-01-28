@@ -9,7 +9,7 @@ import {
   Send,
 } from "lucide-react";
 import { supabase } from "../lib/supabaseClient";
-import Swal from "sweetalert2"; // IMPORT SWEETALERT
+import Swal from "sweetalert2";
 
 const Testimoni = () => {
   const [testimonials, setTestimonials] = useState([]);

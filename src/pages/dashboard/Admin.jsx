@@ -113,7 +113,6 @@ const AdminDashboard = () => {
           }
 
           // D. Parsing Kategori dari Deskripsi "[Hardware] Laptop Rusak..."
-          // Kita ambil teks di dalam kurung siku []
           const match = t.problem_desc
             ? t.problem_desc.match(/^\[(.*?)\]/)
             : null;
@@ -314,7 +313,7 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* KOLOM BAWAH KIRI (TOTAL CUSTOMERS) */}
+          {/* TOTAL CUSTOMERS */}
           <div className="bg-gradient-to-r from-brand-accent/20 to-orange-900/20 backdrop-blur-xl border border-brand-accent/20 p-6 rounded-3xl flex items-center justify-between relative overflow-hidden">
             <div className="relative z-10">
               <div className="flex items-center gap-2 text-brand-accent mb-1 text-sm font-bold uppercase tracking-wider">

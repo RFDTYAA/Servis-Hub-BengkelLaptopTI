@@ -37,7 +37,6 @@ const TECHNICIANS_DATA = [
   { name: "Farrel Ghozy Afifuddin", img: fotofarrel },
   { name: "Muhammad Wildan", img: fotowildan },
   { name: "Raja Muhammad", img: fotoraja },
-  { name: "Jauhan Ahmad", img: fotojauhan },
 ];
 
 const CekStatus = () => {
@@ -77,8 +76,6 @@ const CekStatus = () => {
 
   // --- LOGIC PROGRESS STEPS (INTEGRASI BARU) ---
   const getProgressSteps = (item) => {
-    // Definisi Status Aktif
-    // "Working" berarti sudah disetujui DAN sedang dikerjakan.
     const isApproved = ["Working", "Selesai", "Done", "Approved"].includes(
       item.status,
     );

@@ -19,7 +19,7 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
-  // STATE BARU: Mode Lupa Password
+  // Mode Lupa Password
   const [isResetMode, setIsResetMode] = useState(false);
 
   // --- 1. FUNGSI LOGIN (SUDAH DIPERBAIKI DENGAN SWEETALERT) ---
@@ -54,9 +54,9 @@ const Login = () => {
         title: "Login Berhasil!",
         text: `Selamat datang kembali, ${profile.full_name}!`,
         icon: "success",
-        background: "#1e293b", // Warna Gelap
-        color: "#fff", // Teks Putih
-        confirmButtonColor: "#f97316", // Warna Brand (Orange)
+        background: "#1e293b",
+        color: "#fff",
+        confirmButtonColor: "#f97316",
         timer: 1500,
         showConfirmButton: false,
       }).then(() => {
@@ -82,7 +82,7 @@ const Login = () => {
     }
   };
 
-  // --- 2. FUNGSI RESET PASSWORD (SUDAH DIPERBAIKI DENGAN SWEETALERT) ---
+  // --- 2. FUNGSI RESET PASSWORD ---
   const handleResetPassword = async (e) => {
     e.preventDefault();
     setIsLoading(true);
@@ -104,7 +104,7 @@ const Login = () => {
         confirmButtonColor: "#f97316",
       });
 
-      setIsResetMode(false); // Balik ke mode login
+      setIsResetMode(false);
     } catch (error) {
       // POP-UP GAGAL RESET
       Swal.fire({
@@ -122,7 +122,6 @@ const Login = () => {
 
   return (
     <div className="min-h-screen bg-brand-black flex items-center justify-center relative overflow-hidden p-6">
-      {/* Background Decor */}
       <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-brand-accent/20 rounded-full blur-[120px]"></div>
         <div className="absolute bottom-[-10%] right-[-10%] w-96 h-96 bg-brand-cyan/20 rounded-full blur-[120px]"></div>

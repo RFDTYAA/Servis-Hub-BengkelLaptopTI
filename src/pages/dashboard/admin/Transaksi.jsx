@@ -65,7 +65,7 @@ const Transaksi = () => {
       const { data, error } = await supabase
         .from("transactions")
         .select(`*, profiles:user_id (full_name, email, phone_number)`)
-        .in("status", ["Pending", "Approved", "Working"]) // Ambil semua status aktif
+        .in("status", ["Pending", "Approved", "Working"])
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -116,9 +116,6 @@ const Transaksi = () => {
   const handleSaveEdit = async (e) => {
     e.preventDefault();
 
-    // --- PROTEKSI ALUR ---
-    // Jika masih Pending, Admin TIDAK BOLEH ubah ke Working sendiri.
-    // Harus User yang klik tombol "Setuju" di dashboard mereka.
     if (
       editData.originalStatus === "Pending" &&
       editData.status === "Working"

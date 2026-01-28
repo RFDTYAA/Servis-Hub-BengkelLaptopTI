@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Swal from "sweetalert2";
 
-// --- IMPORT FOTO TEKNISI (Wajib ada agar tidak error) ---
+// --- IMPORT FOTO TEKNISI ---
 import fotoridho from "../../../assets/fotoprofile/ridho.png";
 import fotorafi from "../../../assets/fotoprofile/rafi.png";
 import fotodamtoy from "../../../assets/fotoprofile/damtoy.png";
@@ -104,7 +104,7 @@ const AdminRiwayat = () => {
     return tech ? tech.img : null;
   };
 
-  // Helper Warna & Ikon Status (Handle Inggris & Indo)
+  // Helper Warna & Ikon Status
   const renderStatusBadge = (status) => {
     const isDone = status === "Selesai" || status === "Done";
     const isCancelled = status === "Dibatalkan" || status === "Cancelled";
@@ -118,7 +118,6 @@ const AdminRiwayat = () => {
         }`}
       >
         {isDone ? <CheckCircle size={10} /> : <XCircle size={10} />}
-        {/* Tampilkan teks yang lebih rapi */}
         {isDone ? "Selesai" : "Dibatalkan"}
       </span>
     );

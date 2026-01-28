@@ -1,16 +1,72 @@
-# React + Vite
+# 🛠️ Servis Hub - BengkelLaptopTI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+> **Solusi Tepat Gadget Masa Kini.**
+> Platform web modern untuk manajemen jasa perbaikan Komputer, Laptop, Printer & Handphone dengan sistem tracking transparan.
 
-Currently, two official plugins are available:
+![Project Banner](public/vite.svg) ## 📖 Tentang Proyek
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+**BengkelLaptopTI** adalah aplikasi web yang dibangun untuk mempermudah proses administrasi dan pelacakan servis gadget. Aplikasi ini menghubungkan teknisi (admin) dengan pelanggan, memungkinkan transparansi penuh dalam proses perbaikan mulai dari konsultasi, estimasi harga, hingga status pengerjaan secara _real-time_.
 
-## React Compiler
+Dibuat sebagai proyek pengembangan perangkat lunak menggunakan teknologi web modern.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Fitur Unggulan
 
-## Expanding the ESLint configuration
+### 👤 Untuk Pelanggan (Customer)
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+- **Landing Page Responsif:** Tampilan modern yang nyaman diakses via HP, Tablet, maupun Laptop.
+- **Realtime Tracking:** Cek status perbaikan perangkat cukup dengan melihat dashboard.
+- **Katalog Harga:** Transparansi biaya servis dan sparepart.
+- **Konsultasi via WhatsApp:** Integrasi langsung ke kontak admin.
+- **Manajemen Akun:** Profil pengguna dan riwayat servis.
+
+### 🛡️ Untuk Admin
+
+- **Dashboard Admin:** Ringkasan aktivitas bengkel.
+- **Manajemen Transaksi:** Input data servis masuk, update progres, dan selesaikan servis.
+- **Riwayat Servis:** Database lengkap seluruh pengerjaan yang pernah dilakukan.
+
+## 🚀 Teknologi yang Digunakan (Tech Stack)
+
+Aplikasi ini dibangun menggunakan tumpukan teknologi berikut:
+
+- **Frontend:** [React.js](https://react.dev/) + [Vite](https://vitejs.dev/)
+- **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+- **Database & Auth:** [Supabase](https://supabase.com/)
+- **Routing:** React Router DOM
+- **Icons:** Lucide React
+- **Alerts:** SweetAlert2
+
+## 🚀 Cara Menjalankan Project
+
+1.  Clone repository ini:
+    ```bash
+    git clone [https://github.com/username-kalian/servis-hub-bengkellaptopti.git](https://github.com/username-kalian/servis-hub-bengkellaptopti.git)
+    ```
+2.  Masuk ke direktori project:
+    ```bash
+    cd servis-hub-bengkellaptopti
+    ```
+3.  Install dependencies:
+    ```bash
+    npm install
+    ```
+4.  Buat file `.env` di root folder dan masukkan konfigurasi Supabase kalian:
+    ```env
+    VITE_SUPABASE_URL=MASUKKAN_URL_SUPABASE_DISINI
+    VITE_SUPABASE_ANON_KEY=MASUKKAN_ANON_KEY_DISINI
+    ```
+5.  Jalankan aplikasi Localhost:
+    ```bash
+    npm run dev
+    ```
+
+## 👥 Tim Pengembang
+
+•⁠ _Muhammad Rafi Aditya_
+•⁠ _Mohammad Setya Adjie_
+•⁠ _Jauhan Ahmad_
+
+---
+
+Dikembangkan oleh **GitaFreyaAnindya**
+Universitas Darussalam Gontor - Angkatan 2023

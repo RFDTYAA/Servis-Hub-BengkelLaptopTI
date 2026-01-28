@@ -167,8 +167,7 @@ export const NotaInvoice = React.forwardRef(({ data }, ref) => {
           </div>
         </div>
 
-        {/* === FOOTER (GARANSI & TTD) - POSISI LEBIH NAIK === */}
-        {/* Menggunakan items-start agar sejajar dari atas garis */}
+        {/* === FOOTER === */}
         <div className="flex justify-between items-start pt-4 border-t-2 border-slate-200">
           {/* KIRI: Syarat & Ketentuan */}
           <div className="text-[9px] text-slate-400 max-w-sm leading-relaxed pr-2 pt-1">

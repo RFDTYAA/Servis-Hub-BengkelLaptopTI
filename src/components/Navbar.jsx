@@ -103,7 +103,6 @@ const Navbar = () => {
     // UPDATED: h-16 untuk HP, lg:h-24 untuk Laptop
     <nav className="bg-brand-black/95 backdrop-blur-md text-white h-16 lg:h-24 flex items-center sticky top-0 z-50 border-b border-white/10 shadow-xl transition-all">
       <div className="container mx-auto px-4 lg:px-6 flex justify-between items-center h-full">
-        {/* LOGO (UPDATED: text-xl untuk HP) */}
         <Link
           to="/"
           className="text-xl lg:text-2xl font-extrabold tracking-tighter flex items-center gap-1 group shrink-0"

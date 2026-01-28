@@ -9,7 +9,7 @@ import {
   Loader2,
   LogOut,
   Phone,
-} from "lucide-react"; // Import Phone
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 
@@ -24,7 +24,7 @@ const Profile = () => {
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [role, setRole] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState(""); // State baru untuk No HP
+  const [phoneNumber, setPhoneNumber] = useState("");
 
   // 1. FETCH DATA USER
   useEffect(() => {
@@ -45,7 +45,7 @@ const Profile = () => {
         // Ambil detail dari tabel profiles
         const { data, error } = await supabase
           .from("profiles")
-          .select("full_name, role, avatar_url, phone_number") // Tambahkan phone_number
+          .select("full_name, role, avatar_url, phone_number")
           .eq("id", user.id)
           .single();
 
@@ -57,7 +57,7 @@ const Profile = () => {
           setFullName(data.full_name || "");
           setRole(data.role || "");
           setAvatarUrl(data.avatar_url || null);
-          setPhoneNumber(data.phone_number || ""); // Set phone_number
+          setPhoneNumber(data.phone_number || "");
         }
       } catch (error) {
         Swal.fire("Error", "Gagal memuat data profil!", "error");
