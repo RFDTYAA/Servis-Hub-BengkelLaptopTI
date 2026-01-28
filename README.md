@@ -62,11 +62,11 @@ Aplikasi ini dibangun menggunakan tumpukan teknologi berikut:
 
 ## 👥 Tim Pengembang
 
-•⁠ _Muhammad Rafi Aditya_  
-•⁠ _Mohammad Setya Adjie_  
+•⁠ _Muhammad Rafi Aditya_  <br>
+•⁠ _Mohammad Setya Adjie_  <br>
 •⁠ _Jauhan Ahmad_
 
 ---
 
-Dikembangkan oleh **GitaFreyaAnindya**  
-Universitas Darussalam Gontor - Angkatan 2023
+Dikembangkan oleh **GitaFreyaAnindya**  <br>
+Universitas Darussalam Gontor
