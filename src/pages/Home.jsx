@@ -11,7 +11,7 @@ import {
 import { Link } from "react-router-dom";
 
 const Home = () => {
-  // --- LOGIC WHATSAPP OTOMATIS (Ditambahkan) ---
+  // --- LOGIC WHATSAPP OTOMATIS ---
   const phoneNumber = "6282125548653";
   const message =
     "Halo Admin Bengkel TI, saya ingin konsultasi perihal kerusakan gadget saya. Bisakah dibantu?";
@@ -22,36 +22,39 @@ const Home = () => {
   return (
     <div className="bg-brand-black text-brand-text w-full overflow-hidden">
       {/* --- 1. HERO SECTION --- */}
-      <section className="relative py-16 lg:py-24">
-        <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+      {/* UPDATED: py-12 (HP) -> lg:py-24 (Laptop) */}
+      <section className="relative py-12 lg:py-24">
+        <div className="container mx-auto px-4 lg:px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           {/* Teks Kiri */}
           <div className="z-10 order-2 lg:order-1 text-center lg:text-left">
             <span className="text-brand-accent font-bold tracking-wider uppercase text-xs mb-2 block animate-pulse">
               • Ready to Repair
             </span>
-            <h1 className="text-4xl lg:text-6xl font-bold text-white leading-tight mb-6">
+            {/* UPDATED: Text size responsive (3xl HP -> 5xl Tablet -> 6xl Laptop) */}
+            <h1 className="text-3xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-4 lg:mb-6">
               Solusi Tepat <br />
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-accent to-brand-cyan">
                 Gadget Masa Kini
               </span>
             </h1>
-            <p className="text-gray-400 text-lg mb-8 max-w-md mx-auto lg:mx-0 leading-relaxed">
+            {/* UPDATED: Text base di HP */}
+            <p className="text-gray-400 text-base lg:text-lg mb-6 lg:mb-8 max-w-md mx-auto lg:mx-0 leading-relaxed">
               Jasa perbaikan Komputer, Laptop, Printer & Handphone secara
               profesional dengan sistem tracking transparan. Performa kembali
               ngebut seperti baru. Cepat, Transparan, dan bergaransi.
             </p>
 
-            {/* Tombol Hero */}
-            <div className="flex gap-4 justify-center lg:justify-start">
+            {/* Tombol Hero: Flex col di HP agar tombol memanjang kebawah */}
+            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Link
                 to="/register"
-                className="bg-brand-accent hover:bg-blue-600 text-white px-8 py-3 rounded-full font-bold transition flex items-center gap-2 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
+                className="bg-brand-accent hover:bg-blue-600 text-white px-8 py-3 rounded-full font-bold transition flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(59,130,246,0.5)]"
               >
                 Buat Akun
               </Link>
               <Link
                 to="/pricing"
-                className="border border-white/20 hover:border-white text-white px-8 py-3 rounded-full font-bold transition"
+                className="border border-white/20 hover:border-white text-white px-8 py-3 rounded-full font-bold transition flex items-center justify-center"
               >
                 Cek Harga
               </Link>
@@ -64,23 +67,25 @@ const Home = () => {
             <img
               src="https://images.unsplash.com/photo-1593640408182-31c70c8268f5?q=80&w=1000&auto=format&fit=crop"
               alt="Hero Image"
-              className="relative z-10 h-auto max-h-[350px] lg:max-h-[400px] w-auto object-contain rounded-xl shadow-2xl border border-white/10 hover:scale-105 transition duration-500"
+              className="relative z-10 h-auto max-h-[250px] md:max-h-[350px] lg:max-h-[400px] w-auto object-contain rounded-xl shadow-2xl border border-white/10 hover:scale-105 transition duration-500"
             />
           </div>
         </div>
       </section>
 
       {/* --- 2. GRID LAYANAN --- */}
-      <section className="py-20 bg-brand-black">
-        <div className="container mx-auto px-6">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-white">Layanan Unggulan</h2>
-            <p className="text-gray-400 mt-2">
+      <section className="py-12 lg:py-20 bg-brand-black">
+        <div className="container mx-auto px-4 lg:px-6">
+          <div className="text-center mb-10 lg:mb-16">
+            <h2 className="text-2xl lg:text-3xl font-bold text-white">
+              Layanan Unggulan
+            </h2>
+            <p className="text-gray-400 mt-2 text-sm lg:text-base">
               Apapun masalahnya, kami punya ahlinya.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
             <ImageCard
               img="https://images.unsplash.com/photo-1597872200969-2b65d56bd16b?auto=format&fit=crop&w=500&q=80"
               icon={<Cpu size={24} />}
@@ -110,21 +115,21 @@ const Home = () => {
       </section>
 
       {/* --- 3. SECTION ZIG-ZAG --- */}
-      <section className="py-16 bg-brand-dark">
-        <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="relative flex justify-center">
+      <section className="py-12 lg:py-16 bg-brand-dark">
+        <div className="container mx-auto px-4 lg:px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="relative flex justify-center order-2 lg:order-1">
             <div className="absolute -inset-2 border border-brand-accent/20 rounded-xl transform rotate-2"></div>
             <img
               src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=800&q=80"
               alt="Technician"
-              className="rounded-lg shadow-2xl w-full h-64 lg:h-80 object-cover relative z-10"
+              className="rounded-lg shadow-2xl w-full h-48 sm:h-64 lg:h-80 object-cover relative z-10"
             />
           </div>
-          <div>
-            <h3 className="text-brand-accent font-bold uppercase tracking-widest text-sm mb-2">
+          <div className="order-1 lg:order-2">
+            <h3 className="text-brand-accent font-bold uppercase tracking-widest text-xs lg:text-sm mb-2">
               Profesionalitas
             </h3>
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-2xl lg:text-3xl font-bold text-white mb-4">
               Teknisi Handal
             </h2>
             <p className="text-gray-400 leading-relaxed mb-6 text-sm lg:text-base">
@@ -140,14 +145,14 @@ const Home = () => {
         </div>
       </section>
 
-      {/* --- 4. SECTION ZIG-ZAG --- */}
-      <section className="py-16 bg-brand-black overflow-hidden">
-        <div className="container mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <div className="order-2 lg:order-1">
-            <h3 className="text-brand-cyan font-bold uppercase tracking-widest text-sm mb-2">
+      {/* --- 4. SECTION ZIG-ZAG 2 --- */}
+      <section className="py-12 lg:py-16 bg-brand-black overflow-hidden">
+        <div className="container mx-auto px-4 lg:px-6 grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+          <div className="order-1 lg:order-1">
+            <h3 className="text-brand-cyan font-bold uppercase tracking-widest text-xs lg:text-sm mb-2">
               Transparansi
             </h3>
-            <h2 className="text-3xl font-bold text-white mb-4">
+            <h2 className="text-2xl lg:text-3xl font-bold text-white mb-4">
               Realtime Tracking
             </h2>
             <p className="text-gray-400 leading-relaxed mb-6 text-sm lg:text-base">
@@ -158,18 +163,18 @@ const Home = () => {
               Coba Tracking Sekarang <ArrowRight size={16} />
             </button>
           </div>
-          <div className="relative order-1 lg:order-2 flex justify-center">
+          <div className="relative order-2 lg:order-2 flex justify-center">
             <img
               src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&w=800&q=80"
               alt="System Dashboard"
-              className="rounded-lg shadow-xl w-full h-64 lg:h-80 object-cover border border-white/5"
+              className="rounded-lg shadow-xl w-full h-48 sm:h-64 lg:h-80 object-cover border border-white/5"
             />
           </div>
         </div>
       </section>
 
       {/* --- 5. CTA SECTION --- */}
-      <section className="py-16 bg-brand-black flex justify-center px-6">
+      <section className="py-12 lg:py-16 bg-brand-black flex justify-center px-4 lg:px-6">
         <div className="w-full max-w-4xl bg-gradient-to-r from-brand-dark to-[#0f2027] border border-white/10 rounded-2xl p-8 md:p-12 text-center relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-64 h-64 bg-brand-accent/5 rounded-full blur-[80px]"></div>
 
@@ -182,7 +187,6 @@ const Home = () => {
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              {/* LINK WA DIUPDATE (Menggunakan waLink) */}
               <a
                 href={waLink}
                 target="_blank"
@@ -201,7 +205,7 @@ const Home = () => {
 
 // Komponen Card Gambar
 const ImageCard = ({ img, title, desc, icon }) => (
-  <div className="group relative overflow-hidden rounded-xl h-64 cursor-pointer border border-white/10">
+  <div className="group relative overflow-hidden rounded-xl h-56 lg:h-64 cursor-pointer border border-white/10">
     <img
       src={img}
       alt={title}
